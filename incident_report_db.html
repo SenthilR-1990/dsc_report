@@ -1,0 +1,1993 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DSC Incident Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0d0f14;--surface:#151820;--surface2:#1c2030;--border:#252b3b;--accent:#4f9eff;--accent2:#7c5cff;--green:#22c97a;--orange:#ff8c42;--red:#ff4d6d;--yellow:#ffd166;--text:#e8eaf0;--muted:#6b7594}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'Sora',sans-serif;font-size:13px;line-height:1.5;min-height:100vh}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.25;pointer-events:none;z-index:0}
+
+/* ── Login Screen ── */
+#loginScreen{position:fixed;inset:0;z-index:500;display:flex;align-items:center;justify-content:center;background:var(--bg)}
+#loginScreen::before{content:'';position:absolute;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.25}
+.login-box{position:relative;z-index:1;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:40px;width:380px;box-shadow:0 24px 80px rgba(0,0,0,.5)}
+.login-logo{text-align:center;margin-bottom:28px}
+.login-logo h1{font-size:22px;font-weight:700;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.login-logo p{color:var(--muted);font-size:12px;margin-top:4px}
+.login-box .form-group{margin-bottom:16px}
+.login-box label{display:block;font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.login-box input{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;font-family:'Sora',sans-serif;font-size:13px;outline:none;transition:border-color .15s}
+.login-box input:focus{border-color:var(--accent)}
+.login-btn{width:100%;padding:11px;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:8px;color:#fff;font-family:'Sora',sans-serif;font-size:13px;font-weight:600;cursor:pointer;margin-top:8px;transition:opacity .15s}
+.login-btn:hover{opacity:.88}
+.login-err{color:var(--red);font-size:11px;text-align:center;margin-top:10px;min-height:16px}
+
+/* ── App Shell ── */
+#appShell{display:none;position:relative;z-index:1}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 32px;display:flex;align-items:center;height:52px;gap:16px;position:sticky;top:0;z-index:50}
+.topbar-brand{font-weight:700;font-size:15px;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-right:auto}
+.topbar-user{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--muted)}
+.role-badge{padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;letter-spacing:.5px;text-transform:uppercase}
+.role-admin{background:rgba(255,209,102,.15);color:var(--yellow);border:1px solid rgba(255,209,102,.3)}
+.role-user {background:rgba(79,158,255,.12);color:var(--accent);border:1px solid rgba(79,158,255,.25)}
+.logout-btn{background:none;border:1px solid var(--border);color:var(--muted);padding:4px 12px;border-radius:6px;font-family:'Sora',sans-serif;font-size:11px;cursor:pointer;transition:all .15s}
+.logout-btn:hover{border-color:var(--red);color:var(--red)}
+
+/* ── Tabs ── */
+.tabs{display:flex;gap:2px;background:var(--surface2);padding:4px;border-radius:8px;width:fit-content}
+.tab-btn{background:none;border:none;color:var(--muted);padding:5px 16px;border-radius:6px;font-family:'Sora',sans-serif;font-size:12px;cursor:pointer;transition:all .15s}
+.tab-btn.active{background:var(--surface);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.3)}
+
+.page{max-width:1400px;margin:0 auto;padding:28px 32px}
+
+/* ── KPI ── */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:12px;margin-bottom:24px}
+.kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;position:relative;overflow:hidden;transition:transform .2s}
+.kpi-card:hover{transform:translateY(-2px)}
+.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.kpi-card.blue::before{background:linear-gradient(90deg,var(--accent),var(--accent2))}
+.kpi-card.green::before{background:linear-gradient(90deg,var(--green),#16dba0)}
+.kpi-card.orange::before{background:linear-gradient(90deg,var(--orange),var(--yellow))}
+.kpi-card.red::before{background:linear-gradient(90deg,var(--red),#ff8fa3)}
+.kpi-card.purple::before{background:linear-gradient(90deg,var(--accent2),#c084fc)}
+.kpi-label{font-size:10px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
+.kpi-value{font-size:30px;font-weight:700;line-height:1}
+.kpi-card.blue .kpi-value{color:var(--accent)}
+.kpi-card.green .kpi-value{color:var(--green)}
+.kpi-card.orange .kpi-value{color:var(--orange)}
+.kpi-card.red .kpi-value{color:var(--red)}
+.kpi-card.purple .kpi-value{color:#c084fc}
+.kpi-sub{font-size:11px;color:var(--muted);margin-top:5px}
+
+/* ── Charts ── */
+.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px}
+.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px}
+.chart-title{font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+.bar-group{display:flex;flex-direction:column;gap:8px}
+.bar-row{display:flex;align-items:center;gap:9px}
+.bar-label{width:78px;font-size:11px;color:var(--text);text-align:right;flex-shrink:0}
+.bar-track{flex:1;height:16px;background:var(--surface2);border-radius:4px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px;transition:width 1.2s ease}
+.bar-count{width:30px;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)}
+
+/* ── Toolbar ── */
+.toolbar{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.filter-btn{background:var(--surface);border:1px solid var(--border);color:var(--muted);padding:5px 12px;border-radius:6px;font-family:'Sora',sans-serif;font-size:11px;cursor:pointer;transition:all .15s}
+.filter-btn:hover,.filter-btn.active{background:rgba(79,158,255,.12);border-color:var(--accent);color:var(--accent)}
+.search-box{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:6px;font-family:'Sora',sans-serif;font-size:12px;outline:none;width:200px;transition:border-color .15s}
+.search-box::placeholder{color:var(--muted)}
+.search-box:focus{border-color:var(--accent)}
+.ml-auto{margin-left:auto}
+.btn{padding:7px 16px;border-radius:6px;font-family:'Sora',sans-serif;font-size:12px;font-weight:600;cursor:pointer;border:none;transition:all .15s}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
+.btn-primary:hover{opacity:.85}
+.btn-danger{background:var(--red);color:#fff}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--muted)}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
+.btn-green{background:linear-gradient(135deg,var(--green),#16dba0);color:#fff}
+.btn-mail{background:linear-gradient(135deg,#0078d4,#106ebe);color:#fff}
+.btn-mail:hover{opacity:.85}
+
+/* ── Mail Modal ── */
+.mail-modal{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:0;width:860px;max-width:96vw;max-height:92vh;display:flex;flex-direction:column;position:relative}
+.mail-modal-header{padding:20px 24px 14px;border-bottom:1px solid var(--border);flex-shrink:0}
+.mail-modal-header h2{font-size:15px;font-weight:600;margin-bottom:12px}
+.mail-meta{display:grid;grid-template-columns:auto 1fr;gap:5px 12px;font-size:12px}
+.mail-meta-label{color:var(--muted);font-weight:600;text-transform:uppercase;font-size:10px;letter-spacing:.8px;padding-top:2px}
+.mail-meta-val{color:var(--text)}
+.mail-meta-val input{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:4px 10px;border-radius:5px;font-family:'Sora',sans-serif;font-size:12px;outline:none;width:100%;transition:border-color .15s}
+.mail-meta-val input:focus{border-color:var(--accent)}
+.mail-body-wrap{flex:1;overflow-y:auto;padding:20px 24px}
+.mail-preview{background:#fff;border-radius:8px;padding:20px 24px;font-family:Calibri,Arial,sans-serif;font-size:13px;color:#000;line-height:1.6;min-height:200px}
+.mail-modal-footer{padding:14px 24px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0;flex-wrap:wrap}
+.mail-date-row{display:flex;align-items:center;gap:8px;margin-right:auto;font-size:12px;color:var(--muted)}
+.mail-date-row input{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:4px 10px;border-radius:5px;font-family:'Sora',sans-serif;font-size:12px;outline:none;transition:border-color .15s}
+.mail-date-row input:focus{border-color:var(--accent)}
+
+/* ── Table ── */
+.table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.table-scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead tr{background:var(--surface2);border-bottom:1px solid var(--border)}
+th{padding:10px 12px;text-align:left;font-size:10px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);white-space:nowrap;cursor:pointer;user-select:none}
+th:hover{color:var(--accent)}
+tbody tr{border-bottom:1px solid rgba(37,43,59,.7);transition:background .15s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:rgba(79,158,255,.04)}
+td{padding:9px 12px;vertical-align:top}
+.sno{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)}
+.customer-tag{display:inline-block;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:600;white-space:nowrap}
+.tag-emudhra{background:rgba(79,158,255,.15);color:#7eb8ff}
+.tag-pantasign{background:rgba(124,92,255,.15);color:#b09aff}
+.tag-speedsign{background:rgba(34,201,122,.15);color:#5ddba0}
+.tag-verasys{background:rgba(255,140,66,.15);color:#ffb070}
+.cat-tag{display:inline-block;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:600}
+.cat-breakfix{background:rgba(79,158,255,.1);color:var(--accent)}
+.cat-dev{background:rgba(255,209,102,.12);color:var(--yellow)}
+.cat-integration{background:rgba(192,132,252,.12);color:#c084fc}
+.date-cell{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);white-space:nowrap}
+.issue-text{max-width:200px;line-height:1.4}
+.action-text{max-width:210px;color:#8d9ab8;line-height:1.4;font-size:11px}
+.resource-pill{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;background:var(--surface2);border:1px solid var(--border);white-space:nowrap}
+.status-pill{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:20px;font-size:10px;font-weight:600;white-space:nowrap}
+.status-closed{background:rgba(34,201,122,.12);color:var(--green);border:1px solid rgba(34,201,122,.25)}
+.status-pending{background:rgba(255,140,66,.12);color:var(--orange);border:1px solid rgba(255,140,66,.25)}
+.status-open{background:rgba(255,77,109,.12);color:var(--red);border:1px solid rgba(255,77,109,.25)}
+.status-dot{width:5px;height:5px;border-radius:50%;background:currentColor}
+.model-pill{display:inline-block;padding:1px 6px;border-radius:4px;font-family:'DM Mono',monospace;font-size:10px;background:rgba(79,158,255,.08);color:var(--accent);border:1px solid rgba(79,158,255,.2)}
+.remarks-text{max-width:150px;font-size:10px;color:var(--muted);font-style:italic;line-height:1.4}
+.action-icons{display:flex;gap:5px}
+.icon-btn{background:none;border:1px solid var(--border);border-radius:5px;color:var(--muted);padding:3px 7px;cursor:pointer;font-size:11px;transition:all .15s}
+.icon-btn:hover{border-color:var(--accent);color:var(--accent)}
+.icon-btn.del:hover{border-color:var(--red);color:var(--red)}
+
+/* ── Pagination ── */
+.pagination{display:flex;align-items:center;justify-content:space-between;margin-top:14px}
+.pag-info{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace}
+.pag-btns{display:flex;gap:5px}
+.pag-btn{background:var(--surface);border:1px solid var(--border);color:var(--muted);padding:4px 12px;border-radius:6px;font-family:'Sora',sans-serif;font-size:11px;cursor:pointer;transition:all .15s}
+.pag-btn:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
+.pag-btn:disabled{opacity:.35;cursor:default}
+.pag-btn.active{background:rgba(79,158,255,.15);border-color:var(--accent);color:var(--accent)}
+
+/* ── Modal ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:28px;width:620px;max-width:95vw;max-height:90vh;overflow-y:auto;position:relative}
+.modal h2{font-size:16px;font-weight:600;margin-bottom:18px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-grid .full{grid-column:1/-1}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-group label{font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
+.form-group input,.form-group select,.form-group textarea{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:6px;font-family:'Sora',sans-serif;font-size:12px;outline:none;transition:border-color .15s;width:100%}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--accent)}
+.form-group textarea{resize:vertical;min-height:56px}
+.form-group select option{background:var(--surface2)}
+.modal-actions{display:flex;gap:10px;margin-top:18px;justify-content:flex-end}
+.close-modal{position:absolute;top:14px;right:14px;background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer}
+.close-modal:hover{color:var(--text)}
+
+/* ── Admin Panel ── */
+.admin-section{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:20px}
+.admin-section h3{font-size:14px;font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.admin-badge{font-size:10px;padding:2px 8px;border-radius:4px;background:rgba(255,209,102,.15);color:var(--yellow);border:1px solid rgba(255,209,102,.3);font-weight:600;letter-spacing:.5px}
+
+/* ── Upload area ── */
+.upload-zone{border:2px dashed var(--border);border-radius:10px;padding:40px;text-align:center;transition:all .2s;cursor:pointer;position:relative}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--accent);background:rgba(79,158,255,.04)}
+.upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.upload-icon{font-size:36px;margin-bottom:12px}
+.upload-title{font-size:14px;font-weight:600;margin-bottom:6px}
+.upload-sub{font-size:11px;color:var(--muted)}
+.upload-result{margin-top:16px;background:var(--surface2);border-radius:8px;padding:14px;font-size:12px}
+.upload-result.success{border-left:3px solid var(--green)}
+.upload-result.error{border-left:3px solid var(--red)}
+.upload-result .stat{display:flex;justify-content:space-between;margin-bottom:4px}
+.upload-result .errs{margin-top:8px;color:var(--red);font-size:11px;font-family:'DM Mono',monospace;max-height:120px;overflow-y:auto}
+.template-hint{margin-top:14px;padding:12px;background:rgba(79,158,255,.06);border:1px solid rgba(79,158,255,.15);border-radius:8px;font-size:11px;color:var(--muted)}
+.template-hint strong{color:var(--accent)}
+
+/* ── Users table ── */
+.users-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:12px}
+.users-table th{padding:9px 12px;text-align:left;font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)}
+.users-table td{padding:9px 12px;border-bottom:1px solid rgba(37,43,59,.5)}
+.users-table tr:last-child td{border-bottom:none}
+.active-dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:5px}
+.active-dot.on{background:var(--green)}
+.active-dot.off{background:var(--red)}
+
+/* ── Loading ── */
+.loading-row td{text-align:center;padding:36px;color:var(--muted)}
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;margin-right:8px;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty-row td{text-align:center;padding:36px;color:var(--muted)}
+
+/* ── Toast ── */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:11px 18px;font-size:12px;z-index:999;transform:translateY(60px);opacity:0;transition:all .3s;pointer-events:none}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.success{border-color:var(--green);color:var(--green)}
+.toast.error{border-color:var(--red);color:var(--red)}
+
+.api-status{display:flex;align-items:center;gap:6px;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)}
+.api-dot{width:6px;height:6px;border-radius:50%;background:var(--red)}
+.api-dot.up{background:var(--green);box-shadow:0 0 6px var(--green)}
+
+/* ── Home Tiles ── */
+#homeScreen{display:none;position:fixed;inset:0;z-index:100;background:var(--bg);align-items:center;justify-content:center;flex-direction:column;gap:32px}
+#homeScreen::before{content:'';position:absolute;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.25;pointer-events:none}
+.home-title{font-size:22px;font-weight:700;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-align:center;position:relative;z-index:1}
+.home-subtitle{color:var(--muted);font-size:12px;margin-top:-20px;position:relative;z-index:1}
+.home-tiles{display:flex;gap:24px;position:relative;z-index:1;flex-wrap:wrap;justify-content:center}
+.home-tile{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:40px 48px;cursor:pointer;transition:all .25s;text-align:center;min-width:220px;position:relative;overflow:hidden}
+.home-tile::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;transition:opacity .25s}
+.home-tile.tile-blue::before{background:linear-gradient(90deg,var(--accent),var(--accent2))}
+.home-tile.tile-green::before{background:linear-gradient(90deg,var(--green),#16dba0)}
+.home-tile:hover{transform:translateY(-4px);box-shadow:0 16px 48px rgba(0,0,0,.4);border-color:var(--accent)}
+.home-tile:hover.tile-green{border-color:var(--green)}
+.tile-icon{font-size:40px;margin-bottom:16px}
+.tile-label{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.tile-desc{font-size:11px;color:var(--muted)}
+.home-user{position:relative;z-index:1;display:flex;align-items:center;gap:10px;margin-top:-10px}
+
+/* ── Integration Shell ── */
+#integrationShell{display:none;position:relative;z-index:1}
+.int-topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 32px;display:flex;align-items:center;height:52px;gap:16px;position:sticky;top:0;z-index:50}
+.int-brand{font-weight:700;font-size:15px;background:linear-gradient(135deg,#fff 30%,var(--green));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-right:auto}
+.back-btn{background:none;border:1px solid var(--border);color:var(--muted);padding:4px 12px;border-radius:6px;font-family:'Sora',sans-serif;font-size:11px;cursor:pointer;transition:all .15s}
+.back-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+/* ── Integration Content ── */
+.int-page{max-width:1400px;margin:0 auto;padding:28px 32px}
+.int-tabs{display:flex;gap:2px;background:var(--surface2);padding:4px;border-radius:8px;width:fit-content;margin-bottom:24px}
+.int-stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:24px}
+
+/* Integration table panels */
+.int-section{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:20px}
+.int-section-title{font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.int-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
+.int-card{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.int-card-name{font-size:12px;font-weight:500;color:var(--text);flex:1}
+.int-card-remarks{font-size:10px;color:var(--muted);font-style:italic;margin-top:2px}
+
+/* Status badges */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:600;white-space:nowrap}
+.badge-completed{background:rgba(34,201,122,.12);color:var(--green);border:1px solid rgba(34,201,122,.3)}
+.badge-pending{background:rgba(255,77,109,.12);color:var(--red);border:1px solid rgba(255,77,109,.25)}
+.badge-partial{background:rgba(255,209,102,.12);color:var(--yellow);border:1px solid rgba(255,209,102,.3)}
+.badge-progress{background:rgba(79,158,255,.12);color:var(--accent);border:1px solid rgba(79,158,255,.25)}
+.badge-resolved{background:rgba(34,201,122,.12);color:var(--green);border:1px solid rgba(34,201,122,.3)}
+.badge-unresolved{background:rgba(255,77,109,.12);color:var(--red);border:1px solid rgba(255,77,109,.25)}
+.badge-integration{background:rgba(124,92,255,.12);color:#b09aff;border:1px solid rgba(124,92,255,.3)}
+.badge-hold{background:rgba(255,140,66,.12);color:var(--orange);border:1px solid rgba(255,140,66,.25)}
+.badge-dev{background:rgba(255,209,102,.12);color:var(--yellow);border:1px solid rgba(255,209,102,.3)}
+
+/* Issue tracker table */
+.issue-table{width:100%;border-collapse:collapse;font-size:12px}
+.issue-table th{padding:10px 12px;text-align:left;font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);background:var(--surface2);border-bottom:1px solid var(--border)}
+.issue-table td{padding:9px 12px;border-bottom:1px solid rgba(37,43,59,.6);vertical-align:top}
+.issue-table tr:last-child td{border-bottom:none}
+.issue-table tr:hover td{background:rgba(79,158,255,.03)}
+.issue-cell{max-width:320px;line-height:1.5;color:var(--text)}
+.remarks-cell{max-width:260px;line-height:1.5;color:#8d9ab8;font-size:11px}
+.int-search{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:6px;font-family:'Sora',sans-serif;font-size:12px;outline:none;width:220px;transition:border-color .15s;margin-bottom:14px}
+.int-search:focus{border-color:var(--accent)}
+.int-filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
+</style>
+</head>
+<body>
+
+<!-- ── Login ── -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">
+      <h1>DSC Incident Tracker</h1>
+      <p>Sign in to your account</p>
+    </div>
+    <div class="form-group">
+      <label>Username</label>
+      <input type="text" id="loginUser" placeholder="admin" autocomplete="username">
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="login-btn" onclick="doLogin()">Sign In</button>
+    <div class="login-err" id="loginErr"></div>
+  </div>
+</div>
+
+<!-- ── Home Screen ── -->
+<div id="homeScreen">
+  <div class="home-title">DSC Tracker Suite</div>
+  <p class="home-subtitle">Choose a module to continue</p>
+  <div class="home-tiles">
+    <div class="home-tile tile-blue" onclick="openCallTracker()">
+      <div class="tile-icon">📋</div>
+      <div class="tile-label">Call Tracker</div>
+      <div class="tile-desc">Incidents · Dashboard · Reports</div>
+    </div>
+    <div class="home-tile tile-green" onclick="openIntegration()">
+      <div class="tile-icon">🔗</div>
+      <div class="tile-label">Integration Pending</div>
+      <div class="tile-desc">CA List · Device · Issue Tracker</div>
+    </div>
+  </div>
+  <div class="home-user">
+    <span style="font-size:12px;color:var(--muted)" id="homeUserName">—</span>
+    <span class="role-badge" id="homeUserRole">—</span>
+    <button class="logout-btn" onclick="doLogout()">Logout</button>
+  </div>
+</div>
+
+<!-- ── Integration Pending Shell ── -->
+<div id="integrationShell">
+  <div class="int-topbar">
+    <button class="back-btn" onclick="goHome()">← Home</button>
+    <div class="int-brand">🔗 Integration Pending Tracker</div>
+    <div class="topbar-user">
+      <span id="intTopbarName">—</span>
+      <span class="role-badge" id="intTopbarRole">—</span>
+      <button class="logout-btn" onclick="doLogout()">Logout</button>
+    </div>
+  </div>
+  <div class="int-page">
+
+    <!-- KPI row -->
+    <div class="int-stats-row" id="intStatsRow"></div>
+
+    <!-- Tabs -->
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:18px">
+      <div class="int-tabs">
+        <button class="tab-btn active" onclick="showIntTab('ca',this)">CA Integration List</button>
+        <button class="tab-btn" onclick="showIntTab('device',this)">Device &amp; Sign Providers</button>
+        <button class="tab-btn" onclick="showIntTab('issues',this)">Issue Tracker</button>
+      </div>
+      <div style="display:flex;gap:8px" id="intAdminBtns">
+        <button class="btn btn-green" id="intUploadBtn" onclick="openIntUpload()" style="display:none">⬆ Upload Excel</button>
+        <button class="btn btn-primary" id="intAddBtn" onclick="openIntAdd()" style="display:none">+ Add Record</button>
+      </div>
+    </div>
+
+    <!-- Tab: CA Integration List -->
+    <div id="intTabCa">
+      <div class="int-filter-row">
+        <input class="int-search" id="caSearch" placeholder="🔍 Search CA…" oninput="loadCaList()">
+        <button class="filter-btn active" onclick="setCaFilter('',this)">All</button>
+        <button class="filter-btn" onclick="setCaFilter('Completed',this)">Completed</button>
+        <button class="filter-btn" onclick="setCaFilter('Pending',this)">Pending</button>
+        <button class="filter-btn" onclick="setCaFilter('Partially Completed',this)">Partial</button>
+      </div>
+      <div class="int-section">
+        <div class="int-section-title">🏦 CA (Certificate Authority) List</div>
+        <div class="int-grid" id="caGrid"><div style="color:var(--muted);font-size:12px"><span class="spinner"></span>Loading…</div></div>
+      </div>
+    </div>
+
+    <!-- Tab: Device & Sign Providers -->
+    <div id="intTabDevice" style="display:none">
+      <div class="int-section">
+        <div class="int-section-title">🖥️ Device Providers</div>
+        <div class="int-grid" id="deviceGrid"><div style="color:var(--muted);font-size:12px"><span class="spinner"></span>Loading…</div></div>
+      </div>
+      <div class="int-section" style="margin-top:16px">
+        <div class="int-section-title">✍️ Sign Application Providers</div>
+        <div class="int-grid" id="signGrid"><div style="color:var(--muted);font-size:12px"><span class="spinner"></span>Loading…</div></div>
+      </div>
+    </div>
+
+    <!-- Tab: Issue Tracker -->
+    <div id="intTabIssues" style="display:none">
+      <div class="int-filter-row">
+        <input class="int-search" id="issueSearch" placeholder="🔍 Search issues…" oninput="loadIssues()">
+        <button class="filter-btn active" onclick="setIssueFilter('',this)">All</button>
+        <button class="filter-btn" onclick="setIssueFilter('Resolved',this)">Resolved</button>
+        <button class="filter-btn" onclick="setIssueFilter('Un Resolved',this)">Unresolved</button>
+        <button class="filter-btn" onclick="setIssueFilter('Integration Required',this)">Integration</button>
+        <button class="filter-btn" onclick="setIssueFilter('On Hold',this)">On Hold</button>
+      </div>
+      <div class="int-section">
+        <div class="int-section-title">🐛 Issue Fixed / Not Fixed Status</div>
+        <div style="overflow-x:auto">
+          <table class="issue-table">
+            <thead><tr><th>#</th><th>Customer</th><th>Issue</th><th>Remarks</th><th>Status</th><th id="issueActionsHdr"></th></tr></thead>
+            <tbody id="issuesTbody"><tr><td colspan="6" style="text-align:center;padding:28px;color:var(--muted)"><span class="spinner"></span>Loading…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── Integration Add/Edit Modal ── -->
+<div class="modal-overlay" id="intModal">
+  <div class="modal" style="width:520px">
+    <button class="close-modal" onclick="closeModal('intModal')">✕</button>
+    <h2 id="intModalTitle">Add Record</h2>
+    <input type="hidden" id="intModalType">
+    <input type="hidden" id="intModalId">
+    <div class="form-grid" id="intModalFields"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('intModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveIntRecord()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Integration Excel Upload Modal ── -->
+<div class="modal-overlay" id="intUploadModal">
+  <div class="modal" style="width:500px">
+    <button class="close-modal" onclick="closeModal('intUploadModal')">✕</button>
+    <h2>Upload Integration Excel</h2>
+    <div class="template-hint" style="margin-bottom:16px">
+      Upload the <strong>Integration_Pending_Status</strong> Excel file.<br>
+      Sheet 1: <strong>CA Integration Pending Status</strong> — CA list will be upserted.<br>
+      Sheet 2: <strong>Issue Fixed and not Fixed Statu</strong> — Issues will be inserted.
+    </div>
+    <div class="upload-zone" id="intUploadZone">
+      <input type="file" id="intExcelFile" accept=".xlsx,.xls" onchange="handleIntFileSelect(this)">
+      <div class="upload-icon">📊</div>
+      <div class="upload-title">Drop Excel file here or click to browse</div>
+      <div class="upload-sub">.xlsx or .xls · Max 5 MB</div>
+    </div>
+    <div id="intUploadResult" style="display:none"></div>
+    <div style="margin-top:14px;display:flex;gap:10px;align-items:center">
+      <button class="btn btn-green" onclick="doIntUpload()" id="intUploadSubmit" disabled>Upload & Import</button>
+      <span id="intSelectedFile" style="font-size:11px;color:var(--muted)">No file selected</span>
+    </div>
+  </div>
+</div>
+
+<!-- ── App ── -->
+<div id="appShell">
+  <!-- Topbar -->
+  <div class="topbar">
+    <button class="back-btn" onclick="goHome()">← Home</button>
+    <div class="topbar-brand">📋 Call Tracker</div>
+    <div class="tabs" id="tabsRow">
+      <button class="tab-btn active" onclick="showTab('dashboard',this)">Dashboard</button>
+      <button class="tab-btn" onclick="showTab('incidents',this)">Incidents</button>
+      <button class="tab-btn" id="adminTab" style="display:none" onclick="showTab('admin',this)">⚙ Admin</button>
+    </div>
+    <div class="topbar-user">
+      <span id="topbarName">—</span>
+      <span class="role-badge" id="topbarRole">—</span>
+      <button class="logout-btn" onclick="doLogout()">Logout</button>
+    </div>
+  </div>
+
+  <!-- Dashboard -->
+  <div id="tabDashboard" class="page">
+    <div class="kpi-grid">
+      <div class="kpi-card blue"><div class="kpi-label">Total Calls</div><div class="kpi-value" id="kpiTotal">—</div><div class="kpi-sub" id="kpiOpenCount">—</div></div>
+      <div class="kpi-card green"><div class="kpi-label">Closed</div><div class="kpi-value" id="kpiClosed">—</div><div class="kpi-sub" id="kpiCloseRate">—</div></div>
+      <div class="kpi-card orange"><div class="kpi-label">Pending</div><div class="kpi-value" id="kpiPending">—</div><div class="kpi-sub">Awaiting resolution</div></div>
+      <div class="kpi-card blue"><div class="kpi-label">Breakfix</div><div class="kpi-value" id="kpiBreakfix">—</div><div class="kpi-sub">Most common type</div></div>
+      <div class="kpi-card purple"><div class="kpi-label">Integration</div><div class="kpi-value" id="kpiIntegration">—</div><div class="kpi-sub">Needs dev support</div></div>
+      <div class="kpi-card red"><div class="kpi-label">Same-Day</div><div class="kpi-value" id="kpiSameDay">—</div><div class="kpi-sub">Closure rate</div></div>
+    </div>
+    <div class="charts-row">
+      <div class="chart-card"><div class="chart-title">Cases by Resource</div><div class="bar-group" id="resourceChart"><div style="color:var(--muted);font-size:11px">Loading…</div></div></div>
+      <div class="chart-card"><div class="chart-title">Cases by Customer</div><div class="bar-group" id="customerChart"><div style="color:var(--muted);font-size:11px">Loading…</div></div></div>
+    </div>
+    <div style="text-align:right;font-size:11px;margin-top:4px">
+      <span class="api-status"><span class="api-dot" id="apiDot"></span><span id="apiStatusText">Checking…</span></span>
+    </div>
+  </div>
+
+  <!-- Incidents -->
+  <div id="tabIncidents" class="page" style="display:none">
+    <div class="toolbar">
+      <span style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Filter:</span>
+      <button class="filter-btn active" onclick="setFilter('status','',this)">All</button>
+      <button class="filter-btn" onclick="setFilter('status','Closed',this)">Closed</button>
+      <button class="filter-btn" onclick="setFilter('status','Pending',this)">Pending</button>
+      <button class="filter-btn" onclick="setFilter('category','Breakfix',this)">Breakfix</button>
+      <button class="filter-btn" onclick="setFilter('category','Integration',this)">Integration</button>
+      <button class="filter-btn" onclick="setFilter('category','Devlopment Team',this)">Dev Team</button>
+      <input type="text" class="search-box" placeholder="🔍  Search…" oninput="debounceSearch(this.value)">
+      <button class="btn btn-ghost ml-auto" onclick="exportExcel(this)" title="Export current filtered view to Excel">⬇ Export Excel</button>
+      <button class="btn btn-mail" onclick="openDailyMailModal()" title="Generate today's DSC daily report email for Outlook">📧 Generate Daily Mail</button>
+      <button class="btn btn-danger" id="deleteAllBtn" onclick="deleteAllIncidents()" style="display:none" title="Delete ALL incidents permanently">🗑 Delete All</button>
+      <button class="btn btn-primary" id="addBtn" onclick="openAddModal()" style="display:none">+ New Incident</button>
+    </div>
+    <div class="table-wrap">
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th onclick="sortBy('id')">#</th>
+              <th onclick="sortBy('customer')">Customer</th>
+              <th>CA</th>
+              <th onclick="sortBy('category')">Category</th>
+              <th onclick="sortBy('incident_date')">Date</th>
+              <th>Issue Reported</th>
+              <th>Action Taken</th>
+              <th onclick="sortBy('resource')">Resource</th>
+              <th onclick="sortBy('status')">Status</th>
+              <th>Duration</th>
+              <th>Model</th>
+              <th>Remarks</th>
+              <th id="actionsHeader"></th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <tr class="loading-row"><td colspan="12"><span class="spinner"></span>Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="pagination">
+      <div class="pag-info" id="pagInfo">—</div>
+      <div class="pag-btns" id="pagBtns"></div>
+    </div>
+  </div>
+
+  <!-- Admin -->
+  <div id="tabAdmin" class="page" style="display:none">
+
+    <!-- Excel Upload -->
+    <div class="admin-section">
+      <h3>📥 Excel Upload <span class="admin-badge">ADMIN</span></h3>
+      <div class="template-hint">
+        <strong>Required columns:</strong> Customer, Category, Date, Issue Reported, Action Taken, Resource, Status, No of Days Taken, Hours Spent, Device Model, Firmware Version, Remarks, CA
+        <br>Date format: <strong>DD-MM-YYYY</strong> or <strong>YYYY-MM-DD</strong>
+      </div>
+      <div style="margin-top:16px">
+        <div class="upload-zone" id="uploadZone">
+          <input type="file" id="excelFile" accept=".xlsx,.xls" onchange="handleFileSelect(this)">
+          <div class="upload-icon">📊</div>
+          <div class="upload-title">Drop Excel file here or click to browse</div>
+          <div class="upload-sub">.xlsx or .xls · Max 5 MB</div>
+        </div>
+        <div id="uploadResult" style="display:none"></div>
+        <div style="margin-top:12px;display:flex;gap:10px;align-items:center">
+          <button class="btn btn-green" onclick="doUpload()" id="uploadBtn" disabled>Upload & Import</button>
+          <span id="selectedFile" style="font-size:11px;color:var(--muted)">No file selected</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- User Management -->
+    <div class="admin-section">
+      <h3>👥 User Management <span class="admin-badge">ADMIN</span></h3>
+      <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
+        <button class="btn btn-primary" onclick="openUserModal()">+ New User</button>
+      </div>
+      <table class="users-table" id="usersTable">
+        <thead><tr>
+          <th>#</th><th>Username</th><th>Full Name</th><th>Email</th>
+          <th>Role</th><th>Status</th><th>Last Login</th><th></th>
+        </tr></thead>
+        <tbody id="usersTbody">
+          <tr><td colspan="8" style="text-align:center;padding:24px;color:var(--muted)"><span class="spinner"></span>Loading…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ── Daily Mail Modal ── -->
+<div class="modal-overlay" id="dailyMailModal">
+  <div class="mail-modal">
+    <button class="close-modal" onclick="closeModal('dailyMailModal')">✕</button>
+    <div class="mail-modal-header">
+      <h2>📧 DSC Daily Report Email</h2>
+      <div class="mail-meta">
+        <span class="mail-meta-label">To</span>
+        <span class="mail-meta-val"><input id="mailTo" value="kamaraj.kuppuraman@precisionit.co.in"></span>
+        <span class="mail-meta-label">CC</span>
+        <span class="mail-meta-val"><input id="mailCc" value="rubala.kathiresan@precisionit.co.in"></span>
+        <span class="mail-meta-label">Subject</span>
+        <span class="mail-meta-val"><input id="mailSubject" value="DSC Break-Fix Status Update"></span>
+      </div>
+    </div>
+    <div class="mail-body-wrap">
+      <div class="mail-preview" id="mailPreview">
+        <div style="text-align:center;padding:40px;color:#888"><span class="spinner"></span> Loading report…</div>
+      </div>
+    </div>
+    <div class="mail-modal-footer">
+      <div class="mail-date-row">
+        <span>Report Date:</span>
+        <input type="date" id="mailDate" onchange="loadDailyReport()">
+      </div>
+      <button class="btn btn-ghost" onclick="copyMailHtml()" id="copyMailBtn">📋 Copy Email</button>
+      <button class="btn btn-mail" onclick="openInOutlook()" id="outlookBtn">📧 Open in Outlook</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Incident Modal ── -->
+<div class="modal-overlay" id="incidentModal">
+  <div class="modal">
+    <button class="close-modal" onclick="closeModal('incidentModal')">✕</button>
+    <h2 id="modalTitle">New Incident</h2>
+    <div class="form-grid">
+      <input type="hidden" id="editId">
+      <div class="form-group"><label>Customer *</label><select id="fCustomer"></select></div>
+      <div class="form-group"><label>Category *</label><select id="fCategory"></select></div>
+      <div class="form-group"><label>Date *</label><input type="date" id="fDate"></div>
+      <div class="form-group"><label>Resource *</label><select id="fResource"></select></div>
+      <div class="form-group"><label>CA</label><input type="text" id="fCa" placeholder="e.g. E-Mudhra, NA"></div>
+      <div class="form-group"><label>Status</label><select id="fStatus"><option>Open</option><option>Closed</option><option>Pending</option></select></div>
+      <div class="form-group full"><label>Issue Reported *</label><textarea id="fIssue" rows="2"></textarea></div>
+      <div class="form-group full"><label>Action Taken</label><textarea id="fAction" rows="2"></textarea></div>
+      <div class="form-group"><label>Hours Spent</label><input type="text" id="fHours" placeholder="e.g. 30 Mins"></div>
+      <div class="form-group"><label>Days Taken</label><input type="text" id="fDays" placeholder="Same day closed"></div>
+      <div class="form-group"><label>Device Model</label><input type="text" id="fModel" placeholder="e.g. PK32XX"></div>
+      <div class="form-group"><label>Firmware Version</label><input type="text" id="fFirmware" placeholder="e.g. 1.4.6"></div>
+      <div class="form-group full"><label>Remarks</label><textarea id="fRemarks" rows="2"></textarea></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('incidentModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveIncident()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── User Modal ── -->
+<div class="modal-overlay" id="userModal">
+  <div class="modal" style="width:440px">
+    <button class="close-modal" onclick="closeModal('userModal')">✕</button>
+    <h2 id="userModalTitle">New User</h2>
+    <div class="form-grid">
+      <input type="hidden" id="editUserId">
+      <div class="form-group"><label>Username *</label><input type="text" id="uUsername" placeholder="john.doe"></div>
+      <div class="form-group"><label>Role *</label><select id="uRole"><option value="user">User</option><option value="admin">Admin</option></select></div>
+      <div class="form-group full"><label>Full Name *</label><input type="text" id="uFullName" placeholder="John Doe"></div>
+      <div class="form-group full"><label>Email</label><input type="email" id="uEmail" placeholder="john@company.com"></div>
+      <div class="form-group full"><label id="uPassLabel">Password *</label><input type="password" id="uPassword" placeholder="Min 6 characters"></div>
+      <div class="form-group full" id="uActiveGroup" style="display:none">
+        <label>Status</label>
+        <select id="uActive"><option value="1">Active</option><option value="0">Disabled</option></select>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('userModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveUser()">Save User</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Session Expiry Warning Banner ── -->
+<div id="sessionWarning" style="display:none;position:fixed;top:52px;left:0;right:0;z-index:100;background:rgba(255,140,66,.12);border-bottom:1px solid rgba(255,140,66,.4);padding:10px 32px;display:none;align-items:center;justify-content:center;gap:16px;font-size:12px;color:var(--orange)">
+  <span>⚠ Your session expires in <strong id="sessionCountdown">—</strong>. Unsaved work will be lost.</span>
+  <button onclick="extendSession()" style="background:var(--orange);border:none;color:#fff;padding:4px 14px;border-radius:6px;font-family:'Sora',sans-serif;font-size:11px;font-weight:600;cursor:pointer">Extend Session</button>
+  <button onclick="document.getElementById('sessionWarning').style.display='none'" style="background:none;border:none;color:var(--orange);cursor:pointer;font-size:16px;line-height:1">✕</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = (window.location.protocol === 'file:' ? 'http://127.0.0.1:5000' : window.location.origin) + '/api';
+
+let AUTH = { token: null, role: null, username: null, full_name: null, can_delete: false };
+let state = {
+  page:1, perPage:50, total:0, totalPages:1,
+  sort:'incident_date', order:'desc',
+  filters:{ status:'', category:'', search:'', date_from:'', date_to:'' },
+  lookups:{ customers:[], categories:[], resources:[] }
+};
+let searchTimer = null;
+let selectedFile = null;
+
+// ── Auth ────────────────────────────────────────────────────
+async function doLogin() {
+  const username = document.getElementById('loginUser').value.trim();
+  const password = document.getElementById('loginPass').value;
+  document.getElementById('loginErr').textContent = '';
+  if (!username || !password) { document.getElementById('loginErr').textContent = 'Enter username and password'; return; }
+  try {
+    const r = await fetch(`${API}/auth/login`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({username, password})
+    });
+    const d = await r.json();
+    if (!d.success) { document.getElementById('loginErr').textContent = d.message; return; }
+    AUTH = { token: d.data.token, role: d.data.role, username: d.data.username, full_name: d.data.full_name, can_delete: d.data.can_delete || d.data.username === 'senthil' || false };
+    localStorage.setItem('dsc_token',      AUTH.token);
+    localStorage.setItem('dsc_role',       AUTH.role);
+    localStorage.setItem('dsc_name',       AUTH.full_name);
+    localStorage.setItem('dsc_user',       AUTH.username);
+    localStorage.setItem('dsc_can_delete', AUTH.can_delete ? '1' : '0');
+    bootApp();
+  } catch(e) { document.getElementById('loginErr').textContent = 'Cannot reach API — is Flask running?'; }
+}
+
+function doLogout() {
+  clearSessionTimers();
+  clearInterval(_countdownInterval);
+  localStorage.clear();
+  AUTH = { token:null, role:null, username:null, full_name:null, can_delete:false };
+  document.getElementById('sessionWarning').style.display = 'none';
+  document.getElementById('homeScreen').style.display = 'none';
+  document.getElementById('appShell').style.display = 'none';
+  document.getElementById('integrationShell').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('loginPass').value = '';
+}
+
+document.getElementById('loginPass').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+
+// ── Central fetch wrapper — ONLY logs out on real 401 ────────
+// Network errors (Flask down, CORS, timeout) propagate WITHOUT logging out.
+// Multiple concurrent 401s are collapsed into one logout via _loggingOut flag.
+let _loggingOut = false;
+
+function handleUnauthorized() {
+  if (_loggingOut) return;
+  _loggingOut = true;
+  clearSessionTimers();
+  showToast('Session expired — please log in again', 'error');
+  setTimeout(() => { _loggingOut = false; doLogout(); }, 1500);
+}
+
+async function apiFetch(url, options = {}) {
+  const res = await fetch(url, options); // network errors throw naturally — no logout
+  if (res.status === 401) {
+    handleUnauthorized();
+    throw new Error('401 Unauthorized');
+  }
+  return res;
+}
+
+// ── JWT client-side payload reader (no crypto verification) ──
+function parseJwt(token) {
+  try {
+    return JSON.parse(atob(token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
+  } catch { return null; }
+}
+
+// ── Session timers: auto-refresh at 75%, warn at 90%, hard logout at 100% ──
+let _sessionTimers  = [];
+let _countdownTick  = null;
+
+function clearSessionTimers() {
+  _sessionTimers.forEach(clearTimeout);
+  _sessionTimers = [];
+  clearInterval(_countdownTick);
+  _countdownTick = null;
+}
+
+function scheduleSessionTimers(token) {
+  clearSessionTimers();
+  const payload = parseJwt(token);
+  if (!payload || !payload.exp) return;
+
+  const expiresAt  = payload.exp * 1000;
+  const issuedAt   = (payload.iat || (payload.exp - 8*3600)) * 1000;
+  const lifetime   = expiresAt - issuedAt;
+  const now        = Date.now();
+  const remaining  = expiresAt - now;
+
+  if (remaining <= 0) return; // already expired — server will reject, let 401 handle it
+
+  const refreshIn  = Math.max(0, lifetime * 0.75 - (now - issuedAt)); // 75% of lifetime
+  const warnIn     = remaining - 5 * 60 * 1000;                        // 5 min before expiry
+  const hardLogIn  = remaining + 3000;                                  // 3 s grace after expiry
+
+  // Silent auto-refresh at 75% lifetime
+  if (refreshIn > 0) {
+    _sessionTimers.push(setTimeout(silentRefresh, refreshIn));
+  } else {
+    silentRefresh(); // already past 75% — refresh now
+  }
+
+  // Warning banner 5 min before expiry (only if silent refresh fails)
+  if (warnIn > 0) {
+    _sessionTimers.push(setTimeout(() => showExpiryBanner(expiresAt), warnIn));
+  }
+
+  // Hard client-side logout after expiry + grace (server will also reject at this point)
+  _sessionTimers.push(setTimeout(() => {
+    if (!_loggingOut) handleUnauthorized();
+  }, hardLogIn));
+}
+
+async function silentRefresh() {
+  if (!AUTH.token || _loggingOut) return;
+  try {
+    const r = await fetch(`${API}/auth/refresh`, { method:'POST', headers: authHeaders() });
+    if (r.status === 401) { handleUnauthorized(); return; }
+    const d = await r.json();
+    if (d.success) {
+      AUTH.token = d.data.token;
+      localStorage.setItem('dsc_token', AUTH.token);
+      // Hide warning banner if it was showing
+      document.getElementById('sessionWarning').style.display = 'none';
+      scheduleSessionTimers(AUTH.token); // reschedule with new token
+    }
+  } catch(e) {
+    // Network error during refresh — token still valid until expiry
+    console.warn('[Session] Auto-refresh failed (network):', e.message);
+  }
+}
+
+let _countdownInterval = null;
+function showExpiryBanner(expiresAt) {
+  const banner = document.getElementById('sessionWarning');
+  banner.style.display = 'flex';
+  clearInterval(_countdownInterval);
+  _countdownInterval = setInterval(() => {
+    const left = Math.max(0, Math.round((expiresAt - Date.now()) / 1000));
+    const m = Math.floor(left / 60), s = String(left % 60).padStart(2,'0');
+    document.getElementById('sessionCountdown').textContent = left > 60 ? `${m}m ${s}s` : `${s}s`;
+    if (left === 0) clearInterval(_countdownInterval);
+  }, 1000);
+}
+
+async function extendSession() {
+  try {
+    const r = await apiFetch(`${API}/auth/refresh`, { method:'POST', headers: authHeaders() });
+    const d = await r.json();
+    if (d.success) {
+      AUTH.token = d.data.token;
+      localStorage.setItem('dsc_token', AUTH.token);
+      document.getElementById('sessionWarning').style.display = 'none';
+      clearInterval(_countdownInterval);
+      scheduleSessionTimers(AUTH.token);
+      showToast('Session extended', 'success');
+    }
+  } catch(e) {
+    if (e.message !== '401 Unauthorized') showToast('Could not extend session — check connection', 'error');
+  }
+}
+
+// ── Boot ────────────────────────────────────────────────────
+(async () => {
+  const token = localStorage.getItem('dsc_token');
+  if (!token) return; // no stored session — stay on login screen
+
+  AUTH.token      = token;
+  AUTH.role       = localStorage.getItem('dsc_role');
+  AUTH.full_name  = localStorage.getItem('dsc_name');
+  AUTH.username   = localStorage.getItem('dsc_user');
+  AUTH.can_delete = localStorage.getItem('dsc_can_delete') === '1' || AUTH.username === 'senthil';
+
+  try {
+    const r = await apiFetch(`${API}/auth/me`, { headers: authHeaders() });
+    // apiFetch already handled 401 — if we reach here the token is valid
+    const d = await r.json();
+    if (d.success) {
+      bootApp();
+    } else {
+      // Unexpected non-success (shouldn't happen on /auth/me with valid token)
+      console.warn('[Boot] /auth/me returned success:false — clearing session');
+      doLogout();
+    }
+  } catch(e) {
+    if (e.message === '401 Unauthorized') return; // handleUnauthorized already fired
+    // Any other error (network down, CORS, timeout) — do NOT log out.
+    // Token might still be valid; user can refresh the page when Flask is up.
+    console.warn('[Boot] API unreachable, keeping session:', e.message);
+    // Optionally show a subtle offline indicator here
+  }
+})();
+
+function bootApp() {
+  document.getElementById('loginScreen').style.display = 'none';
+  // Show home screen with two tiles
+  const homeScreen = document.getElementById('homeScreen');
+  homeScreen.style.display = 'flex';
+  document.getElementById('homeUserName').textContent = AUTH.full_name || AUTH.username;
+  const hrb = document.getElementById('homeUserRole');
+  hrb.textContent = AUTH.role.toUpperCase();
+  hrb.className = 'role-badge ' + (AUTH.role === 'admin' ? 'role-admin' : 'role-user');
+  scheduleSessionTimers(AUTH.token);
+  // Pre-load call tracker data in background
+  loadLookups();
+  loadStats();
+  loadTable();
+}
+
+function openCallTracker() {
+  document.getElementById('homeScreen').style.display = 'none';
+  document.getElementById('integrationShell').style.display = 'none';
+  document.getElementById('appShell').style.display = 'block';
+  // Update topbar user info
+  document.getElementById('topbarName').textContent = AUTH.full_name || AUTH.username;
+  const rb = document.getElementById('topbarRole');
+  rb.textContent = AUTH.role.toUpperCase();
+  rb.className = 'role-badge ' + (AUTH.role === 'admin' ? 'role-admin' : 'role-user');
+  if (AUTH.role === 'admin') {
+    document.getElementById('adminTab').style.display = '';
+    document.getElementById('addBtn').style.display = '';
+  }
+  if (AUTH.can_delete) {
+    document.getElementById('deleteAllBtn').style.display = '';
+  }
+  checkHealth();
+}
+
+function openIntegration() {
+  document.getElementById('homeScreen').style.display = 'none';
+  document.getElementById('appShell').style.display = 'none';
+  document.getElementById('integrationShell').style.display = 'block';
+  document.getElementById('intTopbarName').textContent = AUTH.full_name || AUTH.username;
+  const irb = document.getElementById('intTopbarRole');
+  irb.textContent = AUTH.role.toUpperCase();
+  irb.className = 'role-badge ' + (AUTH.role === 'admin' ? 'role-admin' : 'role-user');
+  // Show admin action buttons
+  if (AUTH.role === 'admin') {
+    document.getElementById('intAddBtn').style.display = '';
+    document.getElementById('intAddBtn').textContent = '+ Add CA';
+    document.getElementById('intUploadBtn').style.display = '';
+  }
+  loadIntStats();
+  loadCaList();
+  loadProviders();
+  loadIssues();
+}
+
+function goHome() {
+  document.getElementById('appShell').style.display = 'none';
+  document.getElementById('integrationShell').style.display = 'none';
+  document.getElementById('homeScreen').style.display = 'flex';
+}
+
+function authHeaders() {
+  return { 'Authorization': `Bearer ${AUTH.token}`, 'Content-Type': 'application/json' };
+}
+
+// ── Health ──────────────────────────────────────────────────
+async function checkHealth() {
+  try {
+    const r = await fetch(`${API}/health`);
+    const d = await r.json();
+    const dot = document.getElementById('apiDot');
+    const txt = document.getElementById('apiStatusText');
+    if (d.success) { dot.classList.add('up'); txt.textContent = 'API · MySQL connected'; }
+    else { txt.textContent = 'API error'; }
+  } catch { document.getElementById('apiStatusText').textContent = 'API offline'; }
+}
+
+// ── Tabs ────────────────────────────────────────────────────
+function showTab(name, btn) {
+  ['dashboard','incidents','admin'].forEach(t => {
+    document.getElementById('tab'+cap(t)).style.display = t===name ? '' : 'none';
+  });
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if (name === 'admin') { loadUsers(); }
+  if (name === 'incidents') { loadTable(); }
+}
+function cap(s) { return s[0].toUpperCase()+s.slice(1); }
+
+// ── Stats ────────────────────────────────────────────────────
+async function loadStats() {
+  try {
+    const r = await apiFetch(`${API}/stats`, { headers: authHeaders() });
+    const d = await r.json();
+    if (!d.success) return;
+    const s = d.data.summary;
+    set('kpiTotal',       s.total);
+    set('kpiOpenCount',   (s.open_count || 0) + ' open');
+    set('kpiClosed',      s.closed);
+    set('kpiPending',     s.pending);
+    set('kpiBreakfix',    s.breakfix);
+    set('kpiIntegration', s.integration);
+    set('kpiSameDay',     (s.same_day_rate||0) + '%');
+    set('kpiCloseRate',   (s.close_rate||0) + '% resolution rate');
+    renderBarChart('resourceChart', d.data.by_resource, 'resource',
+      ['linear-gradient(90deg,var(--accent),var(--accent2))',
+       'linear-gradient(90deg,var(--green),#16dba0)',
+       'linear-gradient(90deg,var(--yellow),var(--orange))',
+       'linear-gradient(90deg,var(--orange),#ffb070)',
+       'linear-gradient(90deg,#c084fc,var(--accent2))']);
+    renderBarChart('customerChart', d.data.by_customer, 'customer',
+      ['linear-gradient(90deg,var(--accent),var(--accent2))',
+       'linear-gradient(90deg,var(--green),#16dba0)',
+       'linear-gradient(90deg,#c084fc,#a855f7)',
+       'linear-gradient(90deg,var(--orange),#ffb070)']);
+  } catch(e) { console.error(e); }
+}
+
+function renderBarChart(elId, data, labelKey, colors) {
+  if (!data || !data.length) return;
+  const max = data[0].cnt;
+  document.getElementById(elId).innerHTML = data.slice(0,6).map((row,i) => `
+    <div class="bar-row">
+      <div class="bar-label">${row[labelKey].replace('DSC - ','').replace('DSC-','')}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.round(row.cnt/max*100)}%;background:${colors[i%colors.length]}"></div></div>
+      <div class="bar-count">${row.cnt}</div>
+    </div>`).join('');
+}
+
+// ── Lookups ──────────────────────────────────────────────────
+async function loadLookups() {
+  try {
+    const r = await apiFetch(`${API}/lookups`, { headers: authHeaders() });
+    const d = await r.json();
+    if (d.success) {
+      state.lookups = d.data;
+      populateSelect('fCustomer', d.data.customers);
+      populateSelect('fCategory', d.data.categories);
+      populateSelect('fResource', d.data.resources);
+    }
+  } catch(e) { console.error(e); }
+}
+
+function populateSelect(id, items) {
+  document.getElementById(id).innerHTML = items.map(i=>`<option value="${i.name}">${i.name}</option>`).join('');
+}
+
+// ── Table ────────────────────────────────────────────────────
+async function loadTable() {
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = '<tr class="loading-row"><td colspan="12"><span class="spinner"></span>Loading…</td></tr>';
+  const params = new URLSearchParams({
+    page: state.page, per_page: state.perPage, sort: state.sort, order: state.order
+  });
+  if (state.filters.status)   params.set('status',   state.filters.status);
+  if (state.filters.category) params.set('category', state.filters.category);
+  if (state.filters.search)   params.set('search',   state.filters.search);
+  try {
+    const r = await apiFetch(`${API}/incidents?${params}`, { headers: authHeaders() });
+    const d = await r.json();
+    if (!d.success) { showToast(d.message,'error'); return; }
+    state.total = d.total; state.totalPages = d.total_pages;
+    if (!d.data.length) {
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="13">No incidents found.</td></tr>';
+      renderPagination(); return;
+    }
+    const isAdmin   = AUTH.role === 'admin';
+    const canDelete = AUTH.can_delete;
+    tbody.innerHTML = d.data.map((row, idx) => {
+      const sNo = (state.page - 1) * state.perPage + idx + 1;
+      return `<tr>
+        <td class="sno">${sNo}</td>
+        <td><span class="customer-tag ${customerClass(row.customer)}">${row.customer.replace('DSC - ','').replace('DSC-','')}</span></td>
+        <td style="font-size:11px;color:var(--muted);white-space:nowrap">${esc(row.ca && row.ca !== 'NA' && row.ca !== '' ? row.ca : (row.customer||'—'))}</td>
+        <td><span class="cat-tag ${catClass(row.category)}">${row.category.replace('Devlopment Team','Dev Team')}</span></td>
+        <td class="date-cell">${row.incident_date}</td>
+        <td><div class="issue-text">${esc(row.issue_reported)}</div></td>
+        <td><div class="action-text">${esc(row.action_taken||'—')}</div></td>
+        <td><span class="resource-pill">${esc(row.resource)}</span></td>
+        <td><span class="status-pill status-${row.status.toLowerCase()}"><span class="status-dot"></span>${row.status}</span></td>
+        <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)">${esc(row.hours_spent||'—')}</td>
+        <td>${row.device_model?`<span class="model-pill">${esc(row.device_model)}</span>`:'—'}</td>
+        <td><div class="remarks-text">${esc(row.remarks||'')}</div></td>
+        <td>${(isAdmin||canDelete)?`<div class="action-icons">
+          ${isAdmin?`<button class="icon-btn" onclick="openEditModal(${row.id})">✎</button>`:''}
+          ${canDelete?`<button class="icon-btn del" onclick="deleteIncident(${row.id})">✕</button>`:''}
+        </div>`:''}</td>
+      </tr>`;
+    }).join('');
+    renderPagination();
+  } catch(e) {
+    if (e.message !== '401 Unauthorized') {
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="12">⚠ Cannot reach API. Is Flask running?</td></tr>';
+    }
+  }
+}
+
+// ── Pagination ───────────────────────────────────────────────
+function renderPagination() {
+  const {page,totalPages,total,perPage} = state;
+  const from = Math.min((page-1)*perPage+1, total);
+  const to   = Math.min(page*perPage, total);
+  set('pagInfo', `${from}–${to} of ${total} records`);
+  const btns = document.getElementById('pagBtns');
+  let html = `<button class="pag-btn" onclick="gotoPage(${page-1})" ${page===1?'disabled':''}>← Prev</button>`;
+  pagRange(page, totalPages).forEach(p => {
+    if (p==='…') html += `<button class="pag-btn" disabled>…</button>`;
+    else html += `<button class="pag-btn ${p===page?'active':''}" onclick="gotoPage(${p})">${p}</button>`;
+  });
+  html += `<button class="pag-btn" onclick="gotoPage(${page+1})" ${page===totalPages||totalPages===0?'disabled':''}>Next →</button>`;
+  btns.innerHTML = html;
+}
+function pagRange(cur, total) {
+  if (total<=7) return Array.from({length:total},(_,i)=>i+1);
+  if (cur<=4)   return [1,2,3,4,5,'…',total];
+  if (cur>=total-3) return [1,'…',total-4,total-3,total-2,total-1,total];
+  return [1,'…',cur-1,cur,cur+1,'…',total];
+}
+function gotoPage(p) { if(p<1||p>state.totalPages) return; state.page=p; loadTable(); }
+
+// ── Filter / Sort ────────────────────────────────────────────
+function setFilter(key, value, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  state.filters[key] = value;
+  if (key==='status')   state.filters.category = '';
+  if (key==='category') state.filters.status   = '';
+  state.page = 1; loadTable();
+}
+function debounceSearch(val) {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(()=>{ state.filters.search=val; state.page=1; loadTable(); }, 350);
+}
+function sortBy(col) {
+  state.order = state.sort===col ? (state.order==='asc'?'desc':'asc') : 'asc';
+  state.sort  = col; loadTable();
+}
+
+// ── Excel Export ─────────────────────────────────────────────
+async function exportExcel(btn) {
+  const orig = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Exporting…';
+
+  // Pass ALL active filters including date range — export is NOT limited to current page
+  const params = new URLSearchParams();
+  if (state.filters.status)    params.set('status',    state.filters.status);
+  if (state.filters.category)  params.set('category',  state.filters.category);
+  if (state.filters.search)    params.set('search',    state.filters.search);
+  if (state.filters.date_from) params.set('date_from', state.filters.date_from);
+  if (state.filters.date_to)   params.set('date_to',   state.filters.date_to);
+
+  try {
+    const r = await fetch(`${API}/incidents/export?${params}`, {
+      headers: { 'Authorization': `Bearer ${AUTH.token}` }
+    });
+    if (r.status === 401) { handleUnauthorized(); return; }
+    if (!r.ok) { showToast('Export failed — server error', 'error'); return; }
+
+    const blob  = await r.blob();
+    const url   = URL.createObjectURL(blob);
+    const a     = document.createElement('a');
+    const today = new Date().toISOString().split('T')[0];
+    a.href      = url;
+    a.download  = `DSC_Incidents_${today}.xlsx`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast('Excel file downloaded!', 'success');
+  } catch(e) {
+    showToast('Export failed — check connection', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = orig;
+  }
+}
+
+// ── Incident Modal ───────────────────────────────────────────
+function openAddModal() {
+  document.getElementById('modalTitle').textContent = 'New Incident';
+  document.getElementById('editId').value = '';
+  ['fIssue','fAction','fHours','fDays','fModel','fFirmware','fRemarks','fCa'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('fDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('fStatus').value = 'Open';
+  document.getElementById('incidentModal').classList.add('open');
+}
+async function openEditModal(id) {
+  try {
+    const r = await apiFetch(`${API}/incidents/${id}`, { headers: authHeaders() });
+    const d = await r.json();
+    if (!d.success) { showToast(d.message,'error'); return; }
+    const row = d.data;
+    document.getElementById('modalTitle').textContent = `Edit Incident #${id}`;
+    document.getElementById('editId').value   = id;
+    document.getElementById('fDate').value    = row.incident_date;
+    document.getElementById('fCa').value      = row.ca||'';
+    document.getElementById('fIssue').value   = row.issue_reported||'';
+    document.getElementById('fAction').value  = row.action_taken||'';
+    document.getElementById('fHours').value   = row.hours_spent||'';
+    document.getElementById('fDays').value    = row.days_taken||'';
+    document.getElementById('fModel').value   = row.device_model||'';
+    document.getElementById('fFirmware').value= row.firmware_version||'';
+    document.getElementById('fRemarks').value = row.remarks||'';
+    selByVal('fCustomer', row.customer);
+    selByVal('fCategory', row.category);
+    selByVal('fResource', row.resource);
+    selByVal('fStatus',   row.status);
+    document.getElementById('incidentModal').classList.add('open');
+  } catch(e) {
+    if (e.message !== '401 Unauthorized') showToast('Failed to load incident','error');
+  }
+}
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+async function saveIncident() {
+  const id   = document.getElementById('editId').value;
+  const body = {
+    customer:        document.getElementById('fCustomer').value,
+    category:        document.getElementById('fCategory').value,
+    incident_date:   document.getElementById('fDate').value,
+    issue_reported:  document.getElementById('fIssue').value,
+    action_taken:    document.getElementById('fAction').value,
+    resource:        document.getElementById('fResource').value,
+    status:          document.getElementById('fStatus').value,
+    ca:              document.getElementById('fCa').value,
+    hours_spent:     document.getElementById('fHours').value,
+    days_taken:      document.getElementById('fDays').value,
+    device_model:    document.getElementById('fModel').value,
+    firmware_version:document.getElementById('fFirmware').value,
+    remarks:         document.getElementById('fRemarks').value,
+  };
+  if (!body.issue_reported.trim()) { showToast('Issue Reported is required','error'); return; }
+  try {
+    const r = await apiFetch(`${API}/incidents${id?'/'+id:''}`, {
+      method: id?'PUT':'POST',
+      headers: authHeaders(),
+      body: JSON.stringify(body)
+    });
+    const d = await r.json();
+    if (d.success) {
+      showToast(id?'Incident updated':'Incident created','success');
+      closeModal('incidentModal'); loadTable(); loadStats();
+    } else { showToast(d.message,'error'); }
+  } catch(e) {
+    if (e.message !== '401 Unauthorized') showToast('Request failed','error');
+  }
+}
+
+async function deleteIncident(id) {
+  if (!confirm(`Delete incident #${id}? This cannot be undone.`)) return;
+  try {
+    const r = await apiFetch(`${API}/incidents/${id}`, { method:'DELETE', headers: authHeaders() });
+    const d = await r.json();
+    if (d.success) { showToast('Incident deleted','success'); loadTable(); loadStats(); }
+    else showToast(d.message,'error');
+  } catch(e) {
+    if (e.message !== '401 Unauthorized') showToast('Delete failed','error');
+  }
+}
+
+async function deleteAllIncidents() {
+  const total = state.total || 0;
+  if (!confirm(`⚠️ WARNING: This will permanently delete ALL ${total} incidents from the database.\n\nThis action CANNOT be undone.\n\nType OK to confirm.`)) return;
+  const confirm2 = prompt(`Type DELETE to permanently remove all ${total} incidents:`);
+  if (confirm2 !== 'DELETE') { showToast('Cancelled — nothing was deleted', ''); return; }
+  try {
+    const r = await apiFetch(`${API}/incidents/delete-all`, { method:'DELETE', headers: authHeaders() });
+    const d = await r.json();
+    if (d.success) {
+      showToast(`All ${d.deleted} incidents deleted`, 'success');
+      loadTable(); loadStats();
+    } else showToast(d.message, 'error');
+  } catch(e) {
+    if (e.message !== '401 Unauthorized') showToast('Delete all failed', 'error');
+  }
+}
+
+// ── Excel Upload ─────────────────────────────────────────────
+const uploadZone = document.getElementById('uploadZone');
+uploadZone.addEventListener('dragover', e=>{ e.preventDefault(); uploadZone.classList.add('drag'); });
+uploadZone.addEventListener('dragleave', ()=>uploadZone.classList.remove('drag'));
+uploadZone.addEventListener('drop', e=>{
+  e.preventDefault(); uploadZone.classList.remove('drag');
+  const file = e.dataTransfer.files[0];
+  if (file) setFile(file);
+});
+
+function handleFileSelect(input) {
+  if (input.files[0]) setFile(input.files[0]);
+}
+
+function setFile(file) {
+  selectedFile = file;
+  document.getElementById('selectedFile').textContent = `${file.name} (${(file.size/1024).toFixed(1)} KB)`;
+  document.getElementById('uploadBtn').disabled = false;
+  document.getElementById('uploadResult').style.display = 'none';
+}
+
+async function doUpload() {
+  if (!selectedFile) return;
+  const btn = document.getElementById('uploadBtn');
+  btn.disabled = true; btn.textContent = 'Uploading…';
+  const form = new FormData();
+  form.append('file', selectedFile);
+  try {
+    const r = await apiFetch(`${API}/admin/upload-excel`, {
+      method:'POST',
+      headers:{ 'Authorization': `Bearer ${AUTH.token}` },
+      body: form
+    });
+    const d = await r.json();
+    const el = document.getElementById('uploadResult');
+    el.style.display = 'block';
+    if (d.success) {
+      const dt = d.data;
+      el.className = 'upload-result success';
+      el.innerHTML = `
+        <div class="stat"><span>✅ Inserted</span><strong style="color:var(--green)">${dt.inserted}</strong></div>
+        <div class="stat"><span>⏭ Skipped</span><strong style="color:var(--muted)">${dt.skipped}</strong></div>
+        ${dt.errors.length ? `<div class="errs">${dt.errors.map(e=>`• ${e}`).join('<br>')}</div>` : ''}`;
+      showToast(`${dt.inserted} incidents imported!`, 'success');
+      loadTable(); loadStats();
+    } else {
+      el.className = 'upload-result error';
+      el.innerHTML = `<div style="color:var(--red)">❌ ${d.message}</div>`;
+      showToast(d.message, 'error');
+    }
+  } catch(e) {
+    if (e.message !== '401 Unauthorized') showToast('Upload failed — is Flask running?','error');
+  } finally { btn.disabled = false; btn.textContent = 'Upload & Import'; }
+}
+
+// ── Users ────────────────────────────────────────────────────
+async function loadUsers() {
+  const tbody = document.getElementById('usersTbody');
+  tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--muted)"><span class="spinner"></span>Loading…</td></tr>';
+  try {
+    const r = await apiFetch(`${API}/admin/users`, { headers: authHeaders() });
+    const d = await r.json();
+    if (!d.success) { showToast(d.message,'error'); return; }
+    if (!d.data.length) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--muted)">No users found</td></tr>'; return; }
+    tbody.innerHTML = d.data.map(u => `
+      <tr>
+        <td class="sno">${u.id}</td>
+        <td><strong>${esc(u.username)}</strong></td>
+        <td>${esc(u.full_name)}</td>
+        <td style="color:var(--muted)">${esc(u.email||'—')}</td>
+        <td><span class="role-badge ${u.role==='admin'?'role-admin':'role-user'}">${u.role.toUpperCase()}</span></td>
+        <td><span class="active-dot ${u.is_active?'on':'off'}"></span>${u.is_active?'Active':'Disabled'}</td>
+        <td style="color:var(--muted);font-size:11px;font-family:'DM Mono',monospace">${u.last_login?u.last_login.replace('T',' ').slice(0,16):'Never'}</td>
+        <td>
+          <div class="action-icons">
+            <button class="icon-btn" onclick="openEditUserModal(${u.id},'${esc(u.username)}','${esc(u.full_name)}','${esc(u.email||'')}','${u.role}',${u.is_active})">✎</button>
+            ${u.username!==AUTH.username?`<button class="icon-btn del" onclick="deleteUser(${u.id},'${esc(u.username)}')">✕</button>`:''}
+          </div>
+        </td>
+      </tr>`).join('');
+  } catch(e) {
+    if (e.message !== '401 Unauthorized') showToast('Failed to load users','error');
+  }
+}
+
+function openUserModal() {
+  document.getElementById('userModalTitle').textContent = 'New User';
+  document.getElementById('editUserId').value = '';
+  document.getElementById('uUsername').value  = '';
+  document.getElementById('uFullName').value  = '';
+  document.getElementById('uEmail').value     = '';
+  document.getElementById('uPassword').value  = '';
+  document.getElementById('uRole').value      = 'user';
+  document.getElementById('uUsername').disabled = false;
+  document.getElementById('uPassLabel').textContent = 'Password *';
+  document.getElementById('uActiveGroup').style.display = 'none';
+  document.getElementById('userModal').classList.add('open');
+}
+
+function openEditUserModal(id, username, fullName, email, role, isActive) {
+  document.getElementById('userModalTitle').textContent = `Edit User: ${username}`;
+  document.getElementById('editUserId').value = id;
+  document.getElementById('uUsername').value  = username;
+  document.getElementById('uFullName').value  = fullName;
+  document.getElementById('uEmail').value     = email;
+  document.getElementById('uPassword').value  = '';
+  document.getElementById('uRole').value      = role;
+  document.getElementById('uActive').value    = isActive ? '1' : '0';
+  document.getElementById('uUsername').disabled = true;
+  document.getElementById('uPassLabel').textContent = 'New Password (leave blank to keep)';
+  document.getElementById('uActiveGroup').style.display = '';
+  document.getElementById('userModal').classList.add('open');
+}
+
+async function saveUser() {
+  const id       = document.getElementById('editUserId').value;
+  const username = document.getElementById('uUsername').value.trim();
+  const fullName = document.getElementById('uFullName').value.trim();
+  const email    = document.getElementById('uEmail').value.trim();
+  const password = document.getElementById('uPassword').value;
+  const role     = document.getElementById('uRole').value;
+  const isActive = document.getElementById('uActive').value;
+
+  if (!id && (!username || !fullName || !password)) { showToast('Username, Full Name and Password are required','error'); return; }
+  if (id && !fullName) { showToast('Full Name is required','error'); return; }
+
+  const body = id
+    ? { full_name: fullName, email, role, is_active: parseInt(isActive), ...(password?{password}:{}) }
+    : { username, full_name: fullName, email, password, role };
+
+  try {
+    const r = await apiFetch(`${API}/admin/users${id?'/'+id:''}`, {
+      method: id?'PUT':'POST', headers: authHeaders(), body: JSON.stringify(body)
+    });
+    const d = await r.json();
+    if (d.success) {
+      showToast(id?'User updated':'User created','success');
+      closeModal('userModal'); loadUsers();
+    } else { showToast(d.message,'error'); }
+  } catch(e) {
+    if (e.message !== '401 Unauthorized') showToast('Request failed','error');
+  }
+}
+
+async function deleteUser(id, username) {
+  if (!confirm(`Delete user "${username}"? This cannot be undone.`)) return;
+  try {
+    const r = await apiFetch(`${API}/admin/users/${id}`, { method:'DELETE', headers: authHeaders() });
+    const d = await r.json();
+    if (d.success) { showToast('User deleted','success'); loadUsers(); }
+    else showToast(d.message,'error');
+  } catch(e) {
+    if (e.message !== '401 Unauthorized') showToast('Delete failed','error');
+  }
+}
+
+// ── Utils ────────────────────────────────────────────────────
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function set(id,val) { const el=document.getElementById(id); if(el) el.textContent=val; }
+function selByVal(id, val) {
+  const sel = document.getElementById(id);
+  for (let opt of sel.options) { if (opt.value===val||opt.text===val) { sel.value=opt.value; return; } }
+}
+function customerClass(c) {
+  if (c.includes('Emudhra'))   return 'tag-emudhra';
+  if (c.includes('Pantasign')) return 'tag-pantasign';
+  if (c.includes('Speed'))     return 'tag-speedsign';
+  if (c.includes('Verasys'))   return 'tag-verasys';
+  return 'tag-emudhra';
+}
+function catClass(c) {
+  if (c==='Breakfix')    return 'cat-breakfix';
+  if (c==='Integration') return 'cat-integration';
+  return 'cat-dev';
+}
+function showToast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = `toast ${type}`;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 3500);
+}
+
+// Close modals on overlay click
+['incidentModal','userModal'].forEach(id => {
+  document.getElementById(id).addEventListener('click', function(e) {
+    if (e.target===this) closeModal(id);
+  });
+});
+
+// ══════════════════════════════════════════════════════════
+//  INTEGRATION PENDING — API-DRIVEN
+// ══════════════════════════════════════════════════════════
+
+let intCurrentTab = 'ca';
+let caFilter      = '';
+let issueFilter   = '';
+let intSelectedFile = null;
+
+const INT_CA_STATUSES   = ['Pending','Completed','Partially Completed','Working In Progress'];
+const INT_PROV_TYPES    = ['device','sign','service'];
+const INT_ISSUE_STATUSES = ['Resolved','Un Resolved','Integration Required','On Hold','Devolopment team Is working On'];
+
+function statusBadge(s) {
+  if (!s) return '';
+  const sl = s.toLowerCase();
+  let cls = 'badge-pending';
+  if (sl.includes('complet') && !sl.includes('partial')) cls = 'badge-completed';
+  else if (sl.includes('partial'))   cls = 'badge-partial';
+  else if (sl.includes('progress'))  cls = 'badge-progress';
+  else if (sl === 'resolved')        cls = 'badge-resolved';
+  else if (sl.includes('un resol'))  cls = 'badge-unresolved';
+  else if (sl.includes('integrat'))  cls = 'badge-integration';
+  else if (sl.includes('hold'))      cls = 'badge-hold';
+  else if (sl.includes('devo') || sl.includes('dev')) cls = 'badge-dev';
+  return `<span class="badge ${cls}">${esc(s)}</span>`;
+}
+
+function showIntTab(name, btn) {
+  intCurrentTab = name;
+  ['ca','device','issues'].forEach(t => {
+    const el = document.getElementById('intTab' + t.charAt(0).toUpperCase() + t.slice(1));
+    if (el) el.style.display = t === name ? '' : 'none';
+  });
+  document.querySelectorAll('.int-tabs .tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  // Show/hide add button label based on tab
+  const addBtn = document.getElementById('intAddBtn');
+  if (addBtn && AUTH.role === 'admin') {
+    addBtn.textContent = name === 'issues' ? '+ Add Issue' : name === 'device' ? '+ Add Provider' : '+ Add CA';
+  }
+}
+
+function setCaFilter(val, btn) {
+  document.querySelectorAll('#intTabCa .filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  caFilter = val;
+  loadCaList();
+}
+
+function setIssueFilter(val, btn) {
+  document.querySelectorAll('#intTabIssues .filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  issueFilter = val;
+  loadIssues();
+}
+
+// ── Load Stats ───────────────────────────────────────────
+async function loadIntStats() {
+  try {
+    const r = await apiFetch(`${API}/integration/stats`, { headers: authHeaders() });
+    const d = await r.json();
+    if (!d.success) return;
+    const ca = d.data.ca; const is = d.data.issues;
+    const total = ca.total || 1;
+    document.getElementById('intStatsRow').innerHTML = `
+      <div class="kpi-card blue"><div class="kpi-label">Total CA</div><div class="kpi-value" style="font-size:26px">${ca.total||0}</div><div class="kpi-sub">${ca.completed||0} completed</div></div>
+      <div class="kpi-card green"><div class="kpi-label">CA Completed</div><div class="kpi-value" style="font-size:26px;color:var(--green)">${ca.completed||0}</div><div class="kpi-sub">${Math.round((ca.completed||0)/total*100)}% done</div></div>
+      <div class="kpi-card red"><div class="kpi-label">CA Pending</div><div class="kpi-value" style="font-size:26px;color:var(--red)">${ca.pending||0}</div><div class="kpi-sub">${ca.partial||0} partial</div></div>
+      <div class="kpi-card blue"><div class="kpi-label">Total Issues</div><div class="kpi-value" style="font-size:26px">${is.total||0}</div><div class="kpi-sub">${is.resolved||0} resolved</div></div>
+      <div class="kpi-card green"><div class="kpi-label">Resolved</div><div class="kpi-value" style="font-size:26px;color:var(--green)">${is.resolved||0}</div><div class="kpi-sub">${Math.round((is.resolved||0)/(is.total||1)*100)}%</div></div>
+      <div class="kpi-card purple"><div class="kpi-label">Integration Req</div><div class="kpi-value" style="font-size:26px;color:#c084fc">${is.integration_req||0}</div><div class="kpi-sub">${is.on_hold||0} on hold</div></div>`;
+  } catch(e) { console.error(e); }
+}
+
+// ── CA List ──────────────────────────────────────────────
+async function loadCaList() {
+  const grid = document.getElementById('caGrid');
+  grid.innerHTML = '<div style="color:var(--muted);font-size:12px"><span class="spinner"></span>Loading…</div>';
+  const params = new URLSearchParams();
+  if (caFilter) params.set('status', caFilter);
+  const q = document.getElementById('caSearch').value.trim();
+  if (q) params.set('search', q);
+  try {
+    const r = await apiFetch(`${API}/integration/ca?${params}`, { headers: authHeaders() });
+    const d = await r.json();
+    if (!d.success) { grid.innerHTML = '<div style="color:var(--red)">Failed to load</div>'; return; }
+    const isAdmin = AUTH.role === 'admin';
+    grid.innerHTML = d.data.length
+      ? d.data.map((c,i) => `
+          <div class="int-card">
+            <div style="flex:1">
+              <div class="int-card-name"><span style="color:var(--muted);font-family:'DM Mono',monospace;font-size:10px;margin-right:6px">${String(i+1).padStart(2,'0')}</span>${esc(c.name)}</div>
+              ${c.remarks ? `<div class="int-card-remarks">${esc(c.remarks)}</div>` : ''}
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+              ${statusBadge(c.status)}
+              ${isAdmin ? `<button class="icon-btn" onclick="openIntEdit('ca',${c.id})">✎</button><button class="icon-btn del" onclick="deleteIntRecord('ca',${c.id},'${esc(c.name)}')">✕</button>` : ''}
+            </div>
+          </div>`).join('')
+      : '<div style="color:var(--muted);font-size:12px;padding:12px">No records found.</div>';
+  } catch(e) { if (e.message !== '401 Unauthorized') grid.innerHTML = '<div style="color:var(--red)">Error loading data</div>'; }
+}
+
+// ── Providers ────────────────────────────────────────────
+async function loadProviders() {
+  try {
+    const r = await apiFetch(`${API}/integration/providers`, { headers: authHeaders() });
+    const d = await r.json();
+    if (!d.success) return;
+    const isAdmin = AUTH.role === 'admin';
+    const devices = d.data.filter(p => p.provider_type === 'device');
+    const signs   = d.data.filter(p => p.provider_type === 'sign');
+    const renderGrid = (items) => items.length
+      ? items.map(p => `
+          <div class="int-card">
+            <div style="flex:1">
+              <div class="int-card-name">${esc(p.name)}</div>
+              ${p.remarks ? `<div class="int-card-remarks">${esc(p.remarks)}</div>` : ''}
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+              ${statusBadge(p.status)}
+              ${isAdmin ? `<button class="icon-btn" onclick="openIntEdit('provider',${p.id})">✎</button><button class="icon-btn del" onclick="deleteIntRecord('provider',${p.id},'${esc(p.name)}')">✕</button>` : ''}
+            </div>
+          </div>`).join('')
+      : '<div style="color:var(--muted);font-size:12px;padding:12px">No records.</div>';
+    document.getElementById('deviceGrid').innerHTML = renderGrid(devices);
+    document.getElementById('signGrid').innerHTML   = renderGrid(signs);
+  } catch(e) { console.error(e); }
+}
+
+// ── Issues ───────────────────────────────────────────────
+async function loadIssues() {
+  const tbody = document.getElementById('issuesTbody');
+  tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted)"><span class="spinner"></span>Loading…</td></tr>';
+  const params = new URLSearchParams();
+  if (issueFilter) params.set('status', issueFilter);
+  const q = document.getElementById('issueSearch').value.trim();
+  if (q) params.set('search', q);
+  const isAdmin = AUTH.role === 'admin';
+  if (isAdmin) document.getElementById('issueActionsHdr').textContent = '';
+  try {
+    const r = await apiFetch(`${API}/integration/issues?${params}`, { headers: authHeaders() });
+    const d = await r.json();
+    if (!d.success) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--red)">Failed to load</td></tr>'; return; }
+    tbody.innerHTML = d.data.length
+      ? d.data.map((i, idx) => `
+          <tr>
+            <td class="sno">${idx+1}</td>
+            <td><span class="customer-tag ${i.customer==='Speed Sign'?'tag-speedsign':'tag-emudhra'}">${esc(i.customer)}</span></td>
+            <td><div class="issue-cell">${esc(i.issue)}</div></td>
+            <td><div class="remarks-cell">${esc(i.remarks||'—')}</div></td>
+            <td>${statusBadge(i.status)}</td>
+            <td>${isAdmin ? `<div class="action-icons"><button class="icon-btn" onclick="openIntEdit('issue',${i.id})">✎</button><button class="icon-btn del" onclick="deleteIntRecord('issue',${i.id},'issue #${idx+1}')">✕</button></div>` : ''}</td>
+          </tr>`).join('')
+      : '<tr><td colspan="6" style="text-align:center;padding:28px;color:var(--muted)">No issues found.</td></tr>';
+  } catch(e) { if (e.message !== '401 Unauthorized') tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--red)">Error loading</td></tr>'; }
+}
+
+// ── Add / Edit Modal ─────────────────────────────────────
+const INT_STATUS_OPTIONS = INT_CA_STATUSES.map(s=>`<option value="${s}">${s}</option>`).join('');
+const INT_ISSUE_OPTIONS  = INT_ISSUE_STATUSES.map(s=>`<option value="${s}">${s}</option>`).join('');
+const INT_PROV_OPTIONS   = INT_PROV_TYPES.map(t=>`<option value="${t}">${t.charAt(0).toUpperCase()+t.slice(1)}</option>`).join('');
+
+function openIntAdd() {
+  document.getElementById('intModalId').value = '';
+  document.getElementById('intModalType').value = intCurrentTab;
+  document.getElementById('intModalTitle').textContent =
+    intCurrentTab === 'issues' ? 'Add Issue' : intCurrentTab === 'device' ? 'Add Provider' : 'Add CA';
+  buildIntFields(intCurrentTab, null);
+  document.getElementById('intModal').classList.add('open');
+}
+
+async function openIntEdit(type, id) {
+  document.getElementById('intModalId').value   = id;
+  document.getElementById('intModalType').value = type;
+  document.getElementById('intModalTitle').textContent = `Edit ${type === 'issue' ? 'Issue' : type === 'provider' ? 'Provider' : 'CA'} #${id}`;
+  // Fetch current record
+  const endpoint = type === 'ca' ? 'ca' : type === 'provider' ? 'providers' : 'issues';
+  try {
+    const r = await apiFetch(`${API}/integration/${endpoint}`, { headers: authHeaders() });
+    const d = await r.json();
+    const rec = d.data.find(x => x.id === id);
+    buildIntFields(type === 'ca' ? 'ca' : type === 'provider' ? 'device' : 'issues', rec);
+    document.getElementById('intModal').classList.add('open');
+  } catch(e) { showToast('Failed to load record', 'error'); }
+}
+
+function buildIntFields(tab, rec) {
+  const f = document.getElementById('intModalFields');
+  if (tab === 'ca') {
+    f.innerHTML = `
+      <div class="form-group full"><label>CA Name *</label><input type="text" id="if_name" value="${esc(rec?.name||'')}"></div>
+      <div class="form-group full"><label>Status</label><select id="if_status">${INT_STATUS_OPTIONS}</select></div>
+      <div class="form-group full"><label>Remarks</label><textarea id="if_remarks" rows="2">${esc(rec?.remarks||'')}</textarea></div>`;
+    if (rec) selByVal('if_status', rec.status);
+  } else if (tab === 'device') {
+    f.innerHTML = `
+      <div class="form-group full"><label>Provider Name *</label><input type="text" id="if_name" value="${esc(rec?.name||'')}"></div>
+      <div class="form-group"><label>Type</label><select id="if_ptype">${INT_PROV_OPTIONS}</select></div>
+      <div class="form-group"><label>Status</label><select id="if_status">${INT_STATUS_OPTIONS}</select></div>
+      <div class="form-group full"><label>Remarks</label><textarea id="if_remarks" rows="2">${esc(rec?.remarks||'')}</textarea></div>`;
+    if (rec) { selByVal('if_ptype', rec.provider_type); selByVal('if_status', rec.status); }
+  } else {
+    f.innerHTML = `
+      <div class="form-group full"><label>Customer *</label><input type="text" id="if_customer" value="${esc(rec?.customer||'')}"></div>
+      <div class="form-group full"><label>Issue *</label><textarea id="if_issue" rows="3">${esc(rec?.issue||'')}</textarea></div>
+      <div class="form-group full"><label>Remarks</label><textarea id="if_remarks" rows="2">${esc(rec?.remarks||'')}</textarea></div>
+      <div class="form-group full"><label>Status</label><select id="if_status">${INT_ISSUE_OPTIONS}</select></div>`;
+    if (rec) selByVal('if_status', rec.status);
+  }
+}
+
+async function saveIntRecord() {
+  const id   = document.getElementById('intModalId').value;
+  const type = document.getElementById('intModalType').value;
+  let body = {}, endpoint, method, urlSuffix = '';
+  if (type === 'ca') {
+    const name = document.getElementById('if_name').value.trim();
+    if (!name) { showToast('CA Name is required', 'error'); return; }
+    body = { name, status: document.getElementById('if_status').value, remarks: document.getElementById('if_remarks').value };
+    endpoint = 'ca'; method = id ? 'PUT' : 'POST'; urlSuffix = id ? `/${id}` : '';
+  } else if (type === 'device') {
+    const name = document.getElementById('if_name').value.trim();
+    if (!name) { showToast('Provider Name is required', 'error'); return; }
+    body = { name, provider_type: document.getElementById('if_ptype').value, status: document.getElementById('if_status').value, remarks: document.getElementById('if_remarks').value };
+    endpoint = 'providers'; method = id ? 'PUT' : 'POST'; urlSuffix = id ? `/${id}` : '';
+  } else {
+    const customer = document.getElementById('if_customer').value.trim();
+    const issue    = document.getElementById('if_issue').value.trim();
+    if (!customer || !issue) { showToast('Customer and Issue are required', 'error'); return; }
+    body = { customer, issue, remarks: document.getElementById('if_remarks').value, status: document.getElementById('if_status').value };
+    endpoint = 'issues'; method = id ? 'PUT' : 'POST'; urlSuffix = id ? `/${id}` : '';
+  }
+  try {
+    const r = await apiFetch(`${API}/integration/${endpoint}${urlSuffix}`, {
+      method, headers: authHeaders(), body: JSON.stringify(body)
+    });
+    const d = await r.json();
+    if (d.success) {
+      showToast(id ? 'Updated successfully' : 'Record added', 'success');
+      closeModal('intModal');
+      loadIntStats();
+      if (type === 'ca')     loadCaList();
+      else if (type==='device') loadProviders();
+      else loadIssues();
+    } else { showToast(d.message, 'error'); }
+  } catch(e) { if (e.message !== '401 Unauthorized') showToast('Save failed', 'error'); }
+}
+
+async function deleteIntRecord(type, id, label) {
+  if (!confirm(`Delete "${label}"? This cannot be undone.`)) return;
+  const endpoint = type === 'ca' ? 'ca' : type === 'provider' ? 'providers' : 'issues';
+  try {
+    const r = await apiFetch(`${API}/integration/${endpoint}/${id}`, { method: 'DELETE', headers: authHeaders() });
+    const d = await r.json();
+    if (d.success) {
+      showToast('Deleted', 'success');
+      loadIntStats();
+      if (type === 'ca')     loadCaList();
+      else if (type==='provider') loadProviders();
+      else loadIssues();
+    } else { showToast(d.message, 'error'); }
+  } catch(e) { if (e.message !== '401 Unauthorized') showToast('Delete failed', 'error'); }
+}
+
+// ── Excel Upload ─────────────────────────────────────────
+function openIntUpload() {
+  document.getElementById('intUploadResult').style.display = 'none';
+  document.getElementById('intSelectedFile').textContent = 'No file selected';
+  document.getElementById('intUploadSubmit').disabled = true;
+  document.getElementById('intExcelFile').value = '';
+  intSelectedFile = null;
+  document.getElementById('intUploadModal').classList.add('open');
+}
+
+function handleIntFileSelect(input) {
+  if (!input.files[0]) return;
+  intSelectedFile = input.files[0];
+  document.getElementById('intSelectedFile').textContent = `${intSelectedFile.name} (${(intSelectedFile.size/1024).toFixed(1)} KB)`;
+  document.getElementById('intUploadSubmit').disabled = false;
+}
+
+const intUploadZone = document.getElementById('intUploadZone');
+intUploadZone.addEventListener('dragover', e => { e.preventDefault(); intUploadZone.classList.add('drag'); });
+intUploadZone.addEventListener('dragleave', () => intUploadZone.classList.remove('drag'));
+intUploadZone.addEventListener('drop', e => {
+  e.preventDefault(); intUploadZone.classList.remove('drag');
+  if (e.dataTransfer.files[0]) { intSelectedFile = e.dataTransfer.files[0]; document.getElementById('intSelectedFile').textContent = intSelectedFile.name; document.getElementById('intUploadSubmit').disabled = false; }
+});
+
+async function doIntUpload() {
+  if (!intSelectedFile) return;
+  const btn = document.getElementById('intUploadSubmit');
+  btn.disabled = true; btn.textContent = 'Uploading…';
+  const form = new FormData();
+  form.append('file', intSelectedFile);
+  try {
+    const r = await apiFetch(`${API}/integration/upload`, {
+      method: 'POST', headers: { 'Authorization': `Bearer ${AUTH.token}` }, body: form
+    });
+    const d = await r.json();
+    const el = document.getElementById('intUploadResult');
+    el.style.display = 'block';
+    if (d.success) {
+      const ca = d.data.ca || {}; const is = d.data.issues || {};
+      el.className = 'upload-result success';
+      el.innerHTML = `
+        <div class="stat"><span>✅ CA Upserted</span><strong style="color:var(--green)">${ca.upserted||0}</strong></div>
+        <div class="stat"><span>✅ Issues Inserted</span><strong style="color:var(--green)">${is.inserted||0}</strong></div>
+        <div class="stat"><span>⏭ Skipped</span><strong style="color:var(--muted)">${(ca.skipped||0)+(is.skipped||0)}</strong></div>`;
+      showToast('Integration data uploaded!', 'success');
+      loadIntStats(); loadCaList(); loadIssues();
+    } else { el.className='upload-result error'; el.innerHTML=`<div style="color:var(--red)">❌ ${d.message}</div>`; showToast(d.message,'error'); }
+  } catch(e) { if (e.message !== '401 Unauthorized') showToast('Upload failed', 'error'); }
+  finally { btn.disabled = false; btn.textContent = 'Upload & Import'; }
+}
+
+// ══════════════════════════════════════════════════════════
+//  DAILY MAIL GENERATOR
+// ══════════════════════════════════════════════════════════
+
+let _mailReportData = null;
+
+function openDailyMailModal() {
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('mailDate').value = today;
+  // Auto-fill subject with today's date formatted DD_MM_YYYY
+  const [y,m,d] = today.split('-');
+  document.getElementById('mailSubject').value = `DSC Break-Fix Status Update - ${d}_${m}_${y}`;
+  document.getElementById('dailyMailModal').classList.add('open');
+  loadDailyReport();
+}
+
+async function loadDailyReport() {
+  const date = document.getElementById('mailDate').value;
+  if (!date) return;
+  // Update subject date
+  const [y,m,d] = date.split('-');
+  document.getElementById('mailSubject').value = `DSC Break-Fix Status Update - ${d}_${m}_${y}`;
+  document.getElementById('mailPreview').innerHTML =
+    '<div style="text-align:center;padding:40px;color:#888"><span class="spinner"></span> Fetching incidents…</div>';
+  // Disable action buttons while loading
+  document.getElementById('copyMailBtn').disabled = true;
+  document.getElementById('outlookBtn').disabled  = true;
+  _mailReportData = null;
+  try {
+    const r = await apiFetch(`${API}/incidents/daily-report?date=${date}`, { headers: authHeaders() });
+    const resp = await r.json();
+    if (!resp.success) { document.getElementById('mailPreview').innerHTML = `<p style="color:red">${resp.message}</p>`; return; }
+    _mailReportData = resp.data;
+    document.getElementById('mailPreview').innerHTML = buildMailHtml(resp.data, date);
+    document.getElementById('copyMailBtn').disabled = false;
+    document.getElementById('outlookBtn').disabled  = false;
+  } catch(e) {
+    if (e.message !== '401 Unauthorized')
+      document.getElementById('mailPreview').innerHTML = '<p style="color:red">Failed to load report — is Flask running?</p>';
+  }
+}
+
+function buildMailHtml(data, dateStr) {
+  const [y,m,d] = dateStr.split('-');
+  const displayDate = `${d}-${m}-${y}`;        // 27-03-2026
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const monthName = months[parseInt(m,10)-1];
+
+  // CA helper — use stored ca; if blank/NA fall back to full customer name
+  function caVal(r) {
+    const v = (r.ca || '').trim();
+    return (v && v.toUpperCase() !== 'NA') ? v : (r.customer || 'NA');
+  }
+
+  // ── Inline styles (Outlook-safe) ──────────────────────────────────
+  const fontBase  = 'font-family:Calibri,Arial,sans-serif;';
+  const tbl       = `border-collapse:collapse;width:100%;${fontBase}font-size:12px;margin-bottom:18px;`;
+  const thL       = `${fontBase}font-size:11px;padding:7px 10px;border:1px solid #b0b8c9;color:#fff;text-align:left;`;
+  const thC       = `${fontBase}font-size:11px;padding:7px 10px;border:1px solid #b0b8c9;color:#fff;text-align:center;`;
+  const tdL       = `${fontBase}font-size:12px;padding:6px 10px;border:1px solid #dde3ef;vertical-align:top;`;
+  const tdC       = `${fontBase}font-size:12px;padding:6px 10px;border:1px solid #dde3ef;text-align:center;vertical-align:middle;`;
+  const tdBold    = `${tdC}font-weight:700;background:#eef2fa;`;
+  const closedClr = '#155724';
+  const pendingClr = '#7b3300';
+
+  // ── File path ─────────────────────────────────────────────────────
+  const epath = `\\\\172.16.2.58\\ftp_biometric\\Application_Support_Biometric\\Monthly Report Templates\\Service Report\\FY25-26\\DSC\\${monthName} ${y}\\Daily_Report_${dateStr}.xlsx`;
+
+  // ── Customer Pivot ────────────────────────────────────────────────
+  const customers = Object.keys(data.by_customer).sort();
+  let gClosed = 0, gPending = 0;
+  const pivotRows = customers.map(cust => {
+    const c = data.by_customer[cust].Closed  || 0;
+    const p = data.by_customer[cust].Pending || 0;
+    gClosed += c; gPending += p;
+    const short = cust.replace(/^DSC\s*[-\u2013]\s*/i,'').replace(/^DSC-/i,'');
+    return `<tr>
+      <td style="${tdL}">${short}</td>
+      <td style="${tdC}">${c || '&nbsp;'}</td>
+      <td style="${tdC}">${p || '&nbsp;'}</td>
+      <td style="${tdBold}">${c+p}</td>
+    </tr>`;
+  }).join('');
+
+  const pivotHdr = 'background:#1e3a5f;';
+  const pivotTable = `
+    <p style="margin:14px 0 6px;${fontBase}font-size:13px;font-weight:700;color:#1e3a5f;">Customer Wise Report \u2013 ${displayDate}</p>
+    <table style="${tbl}">
+      <thead>
+        <tr>
+          <th style="${thL}${pivotHdr}">Row Labels</th>
+          <th style="${thC}${pivotHdr}">Completed</th>
+          <th style="${thC}${pivotHdr}">Pending</th>
+          <th style="${thC}${pivotHdr}">Grand Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${pivotRows}
+        <tr>
+          <td style="${tdBold}">Grand Total</td>
+          <td style="${tdBold}">${gClosed}</td>
+          <td style="${tdBold}">${gPending}</td>
+          <td style="${tdBold}">${gClosed+gPending}</td>
+        </tr>
+      </tbody>
+    </table>`;
+
+  // ── Incident table builder ────────────────────────────────────────
+  function incidentTable(rows, title, hdrColor) {
+    if (!rows.length) return '';
+    const hdr = `background:${hdrColor};`;
+    const rowsHtml = rows.map((r, i) => {
+      const bg = i % 2 === 0 ? '#ffffff' : '#f5f7fc';
+      const statusColor = r.status === 'Closed' ? closedClr : pendingClr;
+      return `<tr style="background:${bg}">
+        <td style="${tdC}">${i+1}</td>
+        <td style="${tdL}">${esc(r.customer||'')}</td>
+        <td style="${tdL}">${esc(caVal(r))}</td>
+        <td style="${tdL}">${esc(r.issue_reported||'')}</td>
+        <td style="${tdL}">${esc(r.action_taken||'\u2014')}</td>
+        <td style="${tdC}font-weight:700;color:${statusColor}">${r.status}</td>
+        <td style="${tdC}">${esc(r.resource||'')}</td>
+        <td style="${tdC}">${esc(r.hours_spent||'\u2014')}</td>
+        <td style="${tdC}">${esc(r.device_model||'\u2014')}</td>
+        <td style="${tdC}">${esc(r.firmware_version||'\u2014')}</td>
+        <td style="${tdL}">${esc(r.remarks||'')}</td>
+      </tr>`;
+    }).join('');
+    return `
+      <p style="margin:18px 0 6px;${fontBase}font-size:13px;font-weight:700;color:${hdrColor};">${title} \u2013 ${displayDate}</p>
+      <table style="${tbl}">
+        <thead><tr>
+          <th style="${thC}${hdr}">S No</th>
+          <th style="${thL}${hdr}">Customer</th>
+          <th style="${thL}${hdr}">CA</th>
+          <th style="${thL}${hdr}">Issue Reported</th>
+          <th style="${thL}${hdr}">Action Taken</th>
+          <th style="${thC}${hdr}">Status</th>
+          <th style="${thC}${hdr}">Resource</th>
+          <th style="${thC}${hdr}">Time Spent</th>
+          <th style="${thC}${hdr}">Device Model</th>
+          <th style="${thC}${hdr}">Firmware</th>
+          <th style="${thL}${hdr}">Remarks</th>
+        </tr></thead>
+        <tbody>${rowsHtml}</tbody>
+      </table>`;
+  }
+
+  const pS = `style="${fontBase}font-size:13px;margin:4px 0;"`;
+  return `
+    <p ${pS}>Dear Sir,</p>
+    <p ${pS}>&nbsp;</p>
+    <p ${pS}>Please find the DSC overall break-fix call Status Today and Overall Summary</p>
+    <p ${pS}>&nbsp;</p>
+    <p ${pS}>DSC Report in the path :<br>
+      <a href="file://${epath.replace(/\\/g,'/')}" style="color:#0563c1;word-break:break-all;">${epath}</a>
+    </p>
+    <p ${pS}>&nbsp;</p>
+    <p ${pS}><strong>${data.total} Incidents Today</strong></p>
+    <p ${pS}><strong>${data.total_closed} Closed Today</strong></p>
+    <p ${pS}><strong>${data.total_pending} Pending Today</strong></p>
+    <p ${pS}>&nbsp;</p>
+    ${pivotTable}
+    ${incidentTable(data.closed, '\u2705 Completed Calls', '#1e3a5f')}
+    ${data.pending.length ? incidentTable(data.pending, '\u23f3 Pending Calls', '#7b3300') : `<p ${pS} style="color:#888;font-style:italic;">No Pending Calls</p>`}
+    <p ${pS}>&nbsp;</p>
+    <p ${pS}>Warm Regards</p>
+    <p ${pS}>&nbsp;</p>
+    <p ${pS}><strong>Senthil R</strong><br>Tech Lead<br>Precision Biometric India Pvt. Ltd.<br>M +91 8072730101<br><a href="http://www.precisionit.co.in" style="color:#0563c1;">www.precisionit.co.in</a></p>`;
+}
+
+function copyMailHtml() {
+  const preview = document.getElementById('mailPreview');
+  const html = preview.innerHTML;
+  // Use ClipboardItem API for rich HTML copy (pastes formatted into Outlook)
+  try {
+    const blob = new Blob([html], { type: 'text/html' });
+    const item = new ClipboardItem({ 'text/html': blob });
+    navigator.clipboard.write([item]).then(() => {
+      showToast('Email body copied! Paste into Outlook (Ctrl+V)', 'success');
+    }).catch(() => fallbackCopy(preview));
+  } catch(e) {
+    fallbackCopy(preview);
+  }
+}
+
+function fallbackCopy(el) {
+  const range = document.createRange();
+  range.selectNodeContents(el);
+  const sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+  document.execCommand('copy');
+  sel.removeAllRanges();
+  showToast('Email body copied! Paste into Outlook (Ctrl+V)', 'success');
+}
+
+function openInOutlook() {
+  const preview = document.getElementById('mailPreview');
+  // If still showing spinner/error, don't proceed
+  if (!_mailReportData) { showToast('Please wait — report is still loading', 'error'); return; }
+  const to      = document.getElementById('mailTo').value.trim();
+  const cc      = document.getElementById('mailCc').value.trim();
+  const subject = document.getElementById('mailSubject').value.trim();
+  const bodyHtml = preview.innerHTML;
+
+  // Build .eml with X-Unsent:1 — Outlook 2016 opens this as a ready compose window
+  const emlContent = [
+    'MIME-Version: 1.0',
+    `To: ${to}`,
+    `CC: ${cc}`,
+    `Subject: ${subject}`,
+    'X-Unsent: 1',
+    'Content-Type: text/html; charset=UTF-8',
+    '',
+    `<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body style="font-family:Calibri,Arial,sans-serif;font-size:13px;color:#000">`,
+    bodyHtml,
+    `</body></html>`
+  ].join('\r\n');
+
+  const blob = new Blob([emlContent], { type: 'message/rfc822' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  const date = document.getElementById('mailDate').value;
+  a.href     = url;
+  a.download = `DSC_Daily_Report_${date}.eml`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('📧 .eml downloaded — double-click to open in Outlook!', 'success');
+}
+
+
+</script>
+</body>
+</html>
