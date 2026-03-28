@@ -74,6 +74,40 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .bar-fill{height:100%;border-radius:4px;transition:width 1.2s ease}
 .bar-count{width:30px;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)}
 
+/* ── Customer Dashboard Sections ── */
+.cust-section{border-radius:12px;padding:16px;margin-bottom:16px;border:1px solid var(--border)}
+.cust-section.speedsign{border-color:#ff8c42;background:linear-gradient(135deg,rgba(255,140,66,.08),rgba(255,209,102,.04));position:relative;overflow:hidden}
+.cust-section.speedsign::before{content:'⚡ SPEED SIGN';position:absolute;top:10px;right:14px;font-size:9px;font-weight:700;letter-spacing:2px;color:#ff8c42;opacity:.6}
+.cust-section.others{background:var(--surface)}
+.cust-section-title{font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.cust-section.speedsign .cust-section-title{color:#ff8c42}
+.cust-section.others .cust-section-title{color:var(--accent)}
+.cust-mini-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:14px}
+.cust-mini-card{background:var(--surface2);border-radius:8px;padding:12px;text-align:center;cursor:pointer;transition:all .2s;border:1px solid transparent;position:relative}
+.cust-mini-card:hover{transform:translateY(-2px);border-color:var(--accent)}
+.cust-mini-card.speedsign-card{border-color:rgba(255,140,66,.3)}
+.cust-mini-card.speedsign-card:hover{border-color:#ff8c42;box-shadow:0 4px 20px rgba(255,140,66,.2)}
+.cust-mini-name{font-size:10px;font-weight:600;color:var(--muted);margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cust-mini-total{font-size:22px;font-weight:700;color:var(--text);line-height:1}
+.cust-mini-sub{font-size:10px;margin-top:4px;display:flex;justify-content:center;gap:8px}
+.cust-mini-closed{color:var(--green)}
+.cust-mini-pending{color:var(--orange)}
+.cust-click-hint{font-size:9px;color:var(--muted);margin-top:4px;opacity:.7}
+
+/* ── Customer Report Modal ── */
+.cust-modal{background:var(--surface);border-radius:14px;width:92vw;max-width:900px;max-height:88vh;overflow-y:auto;padding:28px;position:relative}
+.cust-modal-header{display:flex;align-items:center;gap:12px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+.cust-modal-name{font-size:20px;font-weight:700}
+.cust-modal-badge{font-size:10px;font-weight:700;letter-spacing:1px;padding:3px 10px;border-radius:20px;text-transform:uppercase}
+.cust-kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin-bottom:20px}
+.cust-kpi{background:var(--surface2);border-radius:8px;padding:12px;text-align:center}
+.cust-kpi-label{font-size:9px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.cust-kpi-val{font-size:24px;font-weight:700}
+.cust-recent-table{width:100%;border-collapse:collapse;font-size:11px;margin-top:8px}
+.cust-recent-table th{background:var(--surface2);padding:8px 10px;text-align:left;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)}
+.cust-recent-table td{padding:8px 10px;border-bottom:1px solid var(--border);vertical-align:top}
+.cust-recent-table tr:hover td{background:rgba(255,255,255,.02)}
+
 /* ── Toolbar ── */
 .toolbar{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
 .filter-btn{background:var(--surface);border:1px solid var(--border);color:var(--muted);padding:5px 12px;border-radius:6px;font-family:'Sora',sans-serif;font-size:11px;cursor:pointer;transition:all .15s}
@@ -462,6 +496,7 @@ td{padding:9px 12px;vertical-align:top}
 
   <!-- Dashboard -->
   <div id="tabDashboard" class="page">
+    <!-- Overall KPIs -->
     <div class="kpi-grid">
       <div class="kpi-card blue"><div class="kpi-label">Total Calls</div><div class="kpi-value" id="kpiTotal">—</div><div class="kpi-sub" id="kpiOpenCount">—</div></div>
       <div class="kpi-card green"><div class="kpi-label">Closed</div><div class="kpi-value" id="kpiClosed">—</div><div class="kpi-sub" id="kpiCloseRate">—</div></div>
@@ -470,10 +505,27 @@ td{padding:9px 12px;vertical-align:top}
       <div class="kpi-card purple"><div class="kpi-label">Integration</div><div class="kpi-value" id="kpiIntegration">—</div><div class="kpi-sub">Needs dev support</div></div>
       <div class="kpi-card red"><div class="kpi-label">Same-Day</div><div class="kpi-value" id="kpiSameDay">—</div><div class="kpi-sub">Closure rate</div></div>
     </div>
-    <div class="charts-row">
-      <div class="chart-card"><div class="chart-title">Cases by Resource</div><div class="bar-group" id="resourceChart"><div style="color:var(--muted);font-size:11px">Loading…</div></div></div>
-      <div class="chart-card"><div class="chart-title">Cases by Customer</div><div class="bar-group" id="customerChart"><div style="color:var(--muted);font-size:11px">Loading…</div></div></div>
+
+    <!-- Speed Sign Highlighted Section -->
+    <div class="cust-section speedsign">
+      <div class="cust-section-title">⚡ Speed Sign Customer</div>
+      <div id="speedSignCards" class="cust-mini-grid"><div style="color:var(--muted);font-size:11px">Loading…</div></div>
+      <div class="charts-row" style="margin-bottom:0">
+        <div class="chart-card"><div class="chart-title">Category Breakdown</div><div class="bar-group" id="ssCategory"><div style="color:var(--muted);font-size:11px">Loading…</div></div></div>
+        <div class="chart-card"><div class="chart-title">Cases by Resource</div><div class="bar-group" id="ssResource"><div style="color:var(--muted);font-size:11px">Loading…</div></div></div>
+      </div>
     </div>
+
+    <!-- Other Customers Section -->
+    <div class="cust-section others">
+      <div class="cust-section-title">🏢 Other Customers</div>
+      <div id="otherCustomerCards" class="cust-mini-grid"><div style="color:var(--muted);font-size:11px">Loading…</div></div>
+      <div class="charts-row" style="margin-bottom:0">
+        <div class="chart-card"><div class="chart-title">Cases by Resource</div><div class="bar-group" id="resourceChart"><div style="color:var(--muted);font-size:11px">Loading…</div></div></div>
+        <div class="chart-card"><div class="chart-title">Cases by Customer</div><div class="bar-group" id="customerChart"><div style="color:var(--muted);font-size:11px">Loading…</div></div></div>
+      </div>
+    </div>
+
     <div style="text-align:right;font-size:11px;margin-top:4px">
       <span class="api-status"><span class="api-dot" id="apiDot"></span><span id="apiStatusText">Checking…</span></span>
     </div>
@@ -492,6 +544,7 @@ td{padding:9px 12px;vertical-align:top}
       <input type="text" class="search-box" placeholder="🔍  Search…" oninput="debounceSearch(this.value)">
       <button class="btn btn-ghost ml-auto" onclick="exportExcel(this)" title="Export current filtered view to Excel">⬇ Export Excel</button>
       <button class="btn btn-mail" onclick="openDailyMailModal()" title="Generate today's DSC daily report email for Outlook">📧 Generate Daily Mail</button>
+      <button class="btn btn-mail" onclick="openPendingMailModal()" title="Generate Overall Pending Report email for Outlook" style="background:#7c3aed">📋 Pending Report Mail</button>
       <button class="btn btn-danger" id="deleteAllBtn" onclick="deleteAllIncidents()" style="display:none" title="Delete ALL incidents permanently">🗑 Delete All</button>
       <button class="btn btn-primary" id="addBtn" onclick="openAddModal()" style="display:none">+ New Incident</button>
     </div>
@@ -598,6 +651,60 @@ td{padding:9px 12px;vertical-align:top}
       </div>
       <button class="btn btn-ghost" onclick="copyMailHtml()" id="copyMailBtn">📋 Copy Email</button>
       <button class="btn btn-mail" onclick="openInOutlook()" id="outlookBtn">📧 Open in Outlook</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Customer Report Modal ── -->
+<div class="modal-overlay" id="customerReportModal">
+  <div class="cust-modal">
+    <button class="close-modal" onclick="closeModal('customerReportModal')">✕</button>
+    <div class="cust-modal-header">
+      <div>
+        <div class="cust-modal-name" id="custModalName">Customer</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px" id="custModalSub">Loading…</div>
+      </div>
+      <span class="cust-modal-badge" id="custModalBadge" style="background:rgba(79,158,255,.15);color:var(--accent)">Customer</span>
+    </div>
+    <div class="cust-kpi-row" id="custModalKpis"></div>
+    <div class="charts-row">
+      <div class="chart-card"><div class="chart-title">By Category</div><div class="bar-group" id="custModalCategoryChart"></div></div>
+      <div class="chart-card"><div class="chart-title">By Resource</div><div class="bar-group" id="custModalResourceChart"></div></div>
+    </div>
+    <div class="chart-card" style="margin-top:0">
+      <div class="chart-title" style="margin-bottom:10px">Recent Incidents</div>
+      <div id="custModalRecentTable"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Pending Report Mail Modal ── -->
+<div class="modal-overlay" id="pendingMailModal">
+  <div class="mail-modal">
+    <button class="close-modal" onclick="closeModal('pendingMailModal')">✕</button>
+    <div class="mail-modal-header">
+      <h2>📋 Overall Pending Report Email</h2>
+      <div class="mail-meta">
+        <span class="mail-meta-label">To</span>
+        <span class="mail-meta-val"><input id="pMailTo" value="kamaraj.kuppuraman@precisionit.co.in"></span>
+        <span class="mail-meta-label">CC</span>
+        <span class="mail-meta-val"><input id="pMailCc" value="rubala.kathiresan@precisionit.co.in"></span>
+        <span class="mail-meta-label">Subject</span>
+        <span class="mail-meta-val"><input id="pMailSubject" value="Overall Pending Report"></span>
+      </div>
+    </div>
+    <div class="mail-body-wrap">
+      <div class="mail-preview" id="pendingMailPreview">
+        <div style="text-align:center;padding:40px;color:#888"><span class="spinner"></span> Loading report…</div>
+      </div>
+    </div>
+    <div class="mail-modal-footer">
+      <div class="mail-date-row">
+        <span>Report Date:</span>
+        <input type="date" id="pMailDate" onchange="loadPendingReport()">
+      </div>
+      <button class="btn btn-ghost" onclick="copyPendingMailHtml()" id="copyPendingMailBtn">📋 Copy Email</button>
+      <button class="btn btn-mail" onclick="openPendingInOutlook()" id="pendingOutlookBtn">📧 Open in Outlook</button>
     </div>
   </div>
 </div>
@@ -973,13 +1080,29 @@ async function loadStats() {
     set('kpiIntegration', s.integration);
     set('kpiSameDay',     (s.same_day_rate||0) + '%');
     set('kpiCloseRate',   (s.close_rate||0) + '% resolution rate');
+
+    // ── Split customers: Speed Sign vs Others ──────────────
+    const allCustomers  = d.data.by_customer || [];
+    const speedSignData = allCustomers.filter(c => c.customer.toLowerCase().includes('speed'));
+    const otherData     = allCustomers.filter(c => !c.customer.toLowerCase().includes('speed'));
+
+    renderCustomerCards('speedSignCards',      speedSignData,  true);
+    renderCustomerCards('otherCustomerCards',  otherData,      false);
+
+    // Speed Sign charts (fetch customer-specific stats)
+    if (speedSignData.length) {
+      const ssName = speedSignData[0].customer;
+      fetchAndRenderCustomerCharts(ssName, 'ssCategory', 'ssResource');
+    }
+
+    // Overall resource + customer charts (others section)
     renderBarChart('resourceChart', d.data.by_resource, 'resource',
       ['linear-gradient(90deg,var(--accent),var(--accent2))',
        'linear-gradient(90deg,var(--green),#16dba0)',
        'linear-gradient(90deg,var(--yellow),var(--orange))',
        'linear-gradient(90deg,var(--orange),#ffb070)',
        'linear-gradient(90deg,#c084fc,var(--accent2))']);
-    renderBarChart('customerChart', d.data.by_customer, 'customer',
+    renderBarChart('customerChart', otherData, 'customer',
       ['linear-gradient(90deg,var(--accent),var(--accent2))',
        'linear-gradient(90deg,var(--green),#16dba0)',
        'linear-gradient(90deg,#c084fc,#a855f7)',
@@ -987,12 +1110,123 @@ async function loadStats() {
   } catch(e) { console.error(e); }
 }
 
+function renderCustomerCards(elId, customers, isSpeedSign) {
+  const el = document.getElementById(elId);
+  if (!customers.length) {
+    el.innerHTML = '<div style="color:var(--muted);font-size:11px">No data</div>';
+    return;
+  }
+  el.innerHTML = customers.map(c => {
+    const short = c.customer.replace(/^DSC\s*[-–]\s*/i,'');
+    const cardClass = isSpeedSign ? 'cust-mini-card speedsign-card' : 'cust-mini-card';
+    return `<div class="${cardClass}" onclick="openCustomerReport('${esc(c.customer)}')">
+      <div class="cust-mini-name" title="${esc(c.customer)}">${esc(short)}</div>
+      <div class="cust-mini-total">${c.cnt}</div>
+      <div class="cust-mini-sub">
+        <span class="cust-mini-closed">✓ ${c.closed||0}</span>
+        <span class="cust-mini-pending">⏳ ${c.pending||0}</span>
+      </div>
+      <div class="cust-click-hint">Click for report →</div>
+    </div>`;
+  }).join('');
+}
+
+async function fetchAndRenderCustomerCharts(customerName, catElId, resElId) {
+  try {
+    const r = await apiFetch(`${API}/stats/customer?name=${encodeURIComponent(customerName)}`, { headers: authHeaders() });
+    const d = await r.json();
+    if (!d.success) return;
+    renderBarChart(catElId, d.data.by_category, 'category',
+      ['linear-gradient(90deg,#ff8c42,#ffd166)',
+       'linear-gradient(90deg,#ff4d6d,#ff8fa3)',
+       'linear-gradient(90deg,#c084fc,#a855f7)']);
+    renderBarChart(resElId, d.data.by_resource, 'resource',
+      ['linear-gradient(90deg,#ff8c42,#ffd166)',
+       'linear-gradient(90deg,#ff4d6d,#ff8fa3)',
+       'linear-gradient(90deg,#c084fc,#a855f7)',
+       'linear-gradient(90deg,var(--green),#16dba0)']);
+  } catch(e) { console.error(e); }
+}
+
+async function openCustomerReport(customerName) {
+  document.getElementById('custModalName').textContent = customerName;
+  document.getElementById('custModalSub').textContent  = 'Loading…';
+  document.getElementById('custModalKpis').innerHTML   = '<div style="color:var(--muted)">Loading…</div>';
+  document.getElementById('custModalCategoryChart').innerHTML = '';
+  document.getElementById('custModalResourceChart').innerHTML = '';
+  document.getElementById('custModalRecentTable').innerHTML   = '';
+
+  const isSpeedSign = customerName.toLowerCase().includes('speed');
+  const badge = document.getElementById('custModalBadge');
+  if (isSpeedSign) {
+    badge.style.background = 'rgba(255,140,66,.15)';
+    badge.style.color      = '#ff8c42';
+    badge.textContent      = '⚡ Speed Sign';
+  } else {
+    badge.style.background = 'rgba(79,158,255,.15)';
+    badge.style.color      = 'var(--accent)';
+    badge.textContent      = 'Customer';
+  }
+
+  document.getElementById('customerReportModal').classList.add('open');
+
+  try {
+    const r = await apiFetch(`${API}/stats/customer?name=${encodeURIComponent(customerName)}`, { headers: authHeaders() });
+    const d = await r.json();
+    if (!d.success) return;
+    const s = d.data.summary;
+
+    document.getElementById('custModalSub').textContent =
+      `${s.total} total calls · ${s.close_rate||0}% resolution rate`;
+
+    // KPIs
+    document.getElementById('custModalKpis').innerHTML = `
+      <div class="cust-kpi"><div class="cust-kpi-label">Total</div><div class="cust-kpi-val" style="color:var(--accent)">${s.total}</div></div>
+      <div class="cust-kpi"><div class="cust-kpi-label">Closed</div><div class="cust-kpi-val" style="color:var(--green)">${s.closed||0}</div></div>
+      <div class="cust-kpi"><div class="cust-kpi-label">Pending</div><div class="cust-kpi-val" style="color:var(--orange)">${s.pending||0}</div></div>
+      <div class="cust-kpi"><div class="cust-kpi-label">Open</div><div class="cust-kpi-val" style="color:var(--red)">${s.open_count||0}</div></div>
+      <div class="cust-kpi"><div class="cust-kpi-label">Breakfix</div><div class="cust-kpi-val" style="color:var(--accent2)">${s.breakfix||0}</div></div>
+      <div class="cust-kpi"><div class="cust-kpi-label">Integration</div><div class="cust-kpi-val" style="color:#c084fc">${s.integration||0}</div></div>`;
+
+    // Charts
+    const colors = isSpeedSign
+      ? ['linear-gradient(90deg,#ff8c42,#ffd166)','linear-gradient(90deg,#ff4d6d,#ff8fa3)','linear-gradient(90deg,#c084fc,#a855f7)','linear-gradient(90deg,var(--green),#16dba0)']
+      : ['linear-gradient(90deg,var(--accent),var(--accent2))','linear-gradient(90deg,var(--green),#16dba0)','linear-gradient(90deg,#c084fc,#a855f7)','linear-gradient(90deg,var(--orange),#ffb070)'];
+    renderBarChart('custModalCategoryChart', d.data.by_category, 'category', colors);
+    renderBarChart('custModalResourceChart', d.data.by_resource, 'resource', colors);
+
+    // Recent incidents table
+    const recent = d.data.recent || [];
+    if (recent.length) {
+      document.getElementById('custModalRecentTable').innerHTML = `
+        <table class="cust-recent-table">
+          <thead><tr>
+            <th>#</th><th>Date</th><th>Category</th><th>Issue Reported</th><th>Resource</th><th>Status</th>
+          </tr></thead>
+          <tbody>${recent.map((row,i) => `<tr>
+            <td style="color:var(--muted)">${i+1}</td>
+            <td style="white-space:nowrap">${row.incident_date||''}</td>
+            <td><span style="font-size:10px;padding:2px 7px;border-radius:4px;background:var(--surface2)">${esc(row.category||'')}</span></td>
+            <td style="max-width:280px">${esc((row.issue_reported||'').substring(0,80))}${(row.issue_reported||'').length>80?'…':''}</td>
+            <td>${esc(row.resource||'')}</td>
+            <td><span style="font-size:10px;font-weight:700;color:${row.status==='Closed'?'var(--green)':row.status==='Pending'?'var(--orange)':'var(--red)'}">${row.status}</span></td>
+          </tr>`).join('')}</tbody>
+        </table>`;
+    } else {
+      document.getElementById('custModalRecentTable').innerHTML = '<div style="color:var(--muted);font-size:11px">No recent incidents</div>';
+    }
+  } catch(e) {
+    console.error(e);
+    document.getElementById('custModalSub').textContent = 'Failed to load';
+  }
+}
+
 function renderBarChart(elId, data, labelKey, colors) {
   if (!data || !data.length) return;
   const max = data[0].cnt;
   document.getElementById(elId).innerHTML = data.slice(0,6).map((row,i) => `
     <div class="bar-row">
-      <div class="bar-label">${row[labelKey].replace('DSC - ','').replace('DSC-','')}</div>
+      <div class="bar-label">${(row[labelKey]||'').replace('DSC - ','').replace('DSC-','')}</div>
       <div class="bar-track"><div class="bar-fill" style="width:${Math.round(row.cnt/max*100)}%;background:${colors[i%colors.length]}"></div></div>
       <div class="bar-count">${row.cnt}</div>
     </div>`).join('');
@@ -1985,6 +2219,228 @@ function openInOutlook() {
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
   showToast('📧 .eml downloaded — double-click to open in Outlook!', 'success');
+}
+
+// ══════════════════════════════════════════════════════════
+//  PENDING REPORT MAIL
+// ══════════════════════════════════════════════════════════
+let _pendingReportData = null;
+
+function openPendingMailModal() {
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('pMailDate').value = today;
+  const [y,m,d] = today.split('-');
+  document.getElementById('pMailSubject').value = `Overall Pending Report_${d}_${m}_${y}`;
+  document.getElementById('pendingMailModal').classList.add('open');
+  loadPendingReport();
+}
+
+async function loadPendingReport() {
+  const date = document.getElementById('pMailDate').value;
+  if (!date) return;
+  const [y,m,d] = date.split('-');
+  document.getElementById('pMailSubject').value = `Overall Pending Report_${d}_${m}_${y}`;
+  document.getElementById('pendingMailPreview').innerHTML =
+    '<div style="text-align:center;padding:40px;color:#888"><span class="spinner"></span> Fetching pending calls…</div>';
+  document.getElementById('copyPendingMailBtn').disabled = true;
+  document.getElementById('pendingOutlookBtn').disabled  = true;
+  _pendingReportData = null;
+  try {
+    const r = await apiFetch(`${API}/incidents/pending-report?date=${date}`, { headers: authHeaders() });
+    const resp = await r.json();
+    if (!resp.success) {
+      document.getElementById('pendingMailPreview').innerHTML = `<p style="color:red">${resp.message}</p>`;
+      return;
+    }
+    _pendingReportData = resp.data;
+    document.getElementById('pendingMailPreview').innerHTML = buildPendingMailHtml(resp.data, date);
+    document.getElementById('copyPendingMailBtn').disabled = false;
+    document.getElementById('pendingOutlookBtn').disabled  = false;
+  } catch(e) {
+    if (e.message !== '401 Unauthorized')
+      document.getElementById('pendingMailPreview').innerHTML = '<p style="color:red">Failed to load report.</p>';
+  }
+}
+
+function buildPendingMailHtml(data, dateStr) {
+  const [y,m,d] = dateStr.split('-');
+  const displayDate = `${d}-${m}-${y}`;
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const monthName = months[parseInt(m,10)-1];
+
+  const fontBase  = 'font-family:Calibri,Arial,sans-serif;';
+  const tbl       = `border-collapse:collapse;width:100%;${fontBase}font-size:12px;margin-bottom:18px;`;
+  const thL       = `${fontBase}font-size:11px;padding:7px 10px;border:1px solid #b0b8c9;color:#fff;text-align:left;`;
+  const thC       = `${fontBase}font-size:11px;padding:7px 10px;border:1px solid #b0b8c9;color:#fff;text-align:center;`;
+  const tdL       = `${fontBase}font-size:12px;padding:6px 10px;border:1px solid #dde3ef;vertical-align:top;`;
+  const tdC       = `${fontBase}font-size:12px;padding:6px 10px;border:1px solid #dde3ef;text-align:center;vertical-align:middle;`;
+  const tdBold    = `${tdC}font-weight:700;background:#eef2fa;`;
+  const pendingClr = '#7b3300';
+
+  const epath = `\\\\172.16.2.58\\ftp_biometric\\Application_Support_Biometric\\Monthly Report Templates\\Service Report\\FY25-26\\Pending Call Report\\DSC\\Pending_Report_${d}_${m}_${y}.xlsx`;
+  const pS = `style="${fontBase}font-size:13px;margin:4px 0;"`;
+
+  // ── Build pivot table ──────────────────────────────────
+  function buildPivot(rows, title, hdrColor) {
+    // Group by customer → category
+    const pivot = {};
+    rows.forEach(r => {
+      const cust = r.customer || 'Unknown';
+      const cat  = r.category || 'Unknown';
+      if (!pivot[cust]) pivot[cust] = {};
+      pivot[cust][cat] = (pivot[cust][cat] || 0) + 1;
+    });
+    const customers = Object.keys(pivot).sort();
+    let grandTotal = 0;
+    let pivotRows = '';
+    customers.forEach(cust => {
+      const cats = Object.keys(pivot[cust]).sort();
+      const custTotal = cats.reduce((s, c) => s + pivot[cust][c], 0);
+      grandTotal += custTotal;
+      const short = cust.replace(/^DSC\s*[-–]\s*/i,'');
+      pivotRows += `<tr>
+        <td style="${tdL}font-weight:700">${esc(cust)}</td>
+        <td style="${tdC}font-weight:700">${custTotal}</td>
+        <td style="${tdBold}">${custTotal}</td>
+      </tr>`;
+      cats.forEach(cat => {
+        pivotRows += `<tr>
+          <td style="${tdL}padding-left:20px">${esc(cat)}</td>
+          <td style="${tdC}">${pivot[cust][cat]}</td>
+          <td style="${tdBold}">${pivot[cust][cat]}</td>
+        </tr>`;
+      });
+    });
+    const hdr = `background:${hdrColor};`;
+    return `
+      <p style="margin:14px 0 6px;${fontBase}font-size:13px;font-weight:700;color:${hdrColor};">${title}</p>
+      <table style="${tbl}">
+        <thead><tr>
+          <th style="${thL}${hdr}">Row Labels</th>
+          <th style="${thC}${hdr}">Pending</th>
+          <th style="${thC}${hdr}">Grand Total</th>
+        </tr></thead>
+        <tbody>
+          ${pivotRows}
+          <tr>
+            <td style="${tdBold}">Grand Total</td>
+            <td style="${tdBold}">${grandTotal}</td>
+            <td style="${tdBold}">${grandTotal}</td>
+          </tr>
+        </tbody>
+      </table>`;
+  }
+
+  // ── Build customer summary text ────────────────────────
+  function buildSummaryText(rows) {
+    const byCustomer = {};
+    rows.forEach(r => {
+      const c = r.customer || 'Unknown';
+      byCustomer[c] = (byCustomer[c] || 0) + 1;
+    });
+    return Object.keys(byCustomer).sort().map(c =>
+      `<p ${pS}><strong>${byCustomer[c]} ${esc(c)}</strong></p>`
+    ).join('');
+  }
+
+  // ── Build detail table ─────────────────────────────────
+  function buildDetailTable(rows, title, hdrColor) {
+    if (!rows.length) return `<p ${pS} style="color:#888;font-style:italic;">No pending calls.</p>`;
+    const hdr = `background:${hdrColor};`;
+    const rowsHtml = rows.map((r, i) => {
+      const bg = i % 2 === 0 ? '#ffffff' : '#f5f7fc';
+      return `<tr style="background:${bg}">
+        <td style="${tdC}">${i+1}</td>
+        <td style="${tdL}">${esc(r.customer||'')}</td>
+        <td style="${tdL}">${esc(r.ca||'NA')}</td>
+        <td style="${tdL}">${esc(r.category||'')}</td>
+        <td style="${tdC}">${esc(r.incident_date||'')}</td>
+        <td style="${tdL}">${esc(r.issue_reported||'')}</td>
+        <td style="${tdL}">${esc(r.action_taken||'—')}</td>
+        <td style="${tdC}">${esc(r.resource||'')}</td>
+        <td style="${tdC}font-weight:700;color:${pendingClr}">${r.status}</td>
+        <td style="${tdC}">${esc(r.days_taken||'')}</td>
+        <td style="${tdC}">${esc(r.hours_spent||'')}</td>
+        <td style="${tdC}">${esc(r.device_model||'')}</td>
+        <td style="${tdC}">${esc(r.firmware_version||'')}</td>
+        <td style="${tdL}">${esc(r.remarks||'')}</td>
+      </tr>`;
+    }).join('');
+    return `
+      <p style="margin:18px 0 6px;${fontBase}font-size:13px;font-weight:700;color:${hdrColor};">${title}</p>
+      <table style="${tbl}">
+        <thead><tr>
+          <th style="${thC}${hdr}">S No</th>
+          <th style="${thL}${hdr}">Customer</th>
+          <th style="${thL}${hdr}">CA</th>
+          <th style="${thL}${hdr}">Category</th>
+          <th style="${thC}${hdr}">Date</th>
+          <th style="${thL}${hdr}">Issue Reported</th>
+          <th style="${thL}${hdr}">Action Taken</th>
+          <th style="${thC}${hdr}">Resource</th>
+          <th style="${thC}${hdr}">Status</th>
+          <th style="${thC}${hdr}">Days Taken</th>
+          <th style="${thC}${hdr}">Hours Spent</th>
+          <th style="${thC}${hdr}">Device Model</th>
+          <th style="${thC}${hdr}">Firmware</th>
+          <th style="${thL}${hdr}">Remarks</th>
+        </tr></thead>
+        <tbody>${rowsHtml}</tbody>
+      </table>`;
+  }
+
+  const todayPending   = data.today_pending   || [];
+  const overallPending = data.overall_pending || [];
+
+  return `
+    <p ${pS}>Dear Sir,</p>
+    <p ${pS}>&nbsp;</p>
+    <p ${pS}>Kindly find the below site and Overall Pending Report ${displayDate},</p>
+    <p ${pS}>&nbsp;</p>
+    <p ${pS}>DSC Report in the path :<br>
+      <a href="file://${epath.replace(/\\/g,'/')}" style="color:#0563c1;word-break:break-all;">${epath}</a>
+    </p>
+    <p ${pS}>&nbsp;</p>
+    <p ${pS}><strong>Pending Calls on – ${displayDate}</strong></p>
+    <p ${pS}>&nbsp;</p>
+    <p ${pS}><strong>${todayPending.length} Total Pending</strong></p>
+    ${buildSummaryText(todayPending)}
+    <p ${pS}>&nbsp;</p>
+    ${buildPivot(todayPending, `${displayDate} Pending Report`, '#1e3a5f')}
+    ${buildDetailTable(todayPending, `⏳ ${displayDate} Pending Calls`, '#7b3300')}
+    <p ${pS}>&nbsp;</p>
+    <p ${pS}><strong>Overall Pending Report</strong></p>
+    <p ${pS}>&nbsp;</p>
+    <p ${pS}><strong>${overallPending.length} Total Pending</strong></p>
+    ${buildSummaryText(overallPending)}
+    <p ${pS}>&nbsp;</p>
+    ${buildPivot(overallPending, 'Overall Pending Report', '#1e3a5f')}
+    ${buildDetailTable(overallPending, '⏳ All Pending Calls', '#7b3300')}
+    <p ${pS}>&nbsp;</p>
+    <p ${pS}>Warm Regards</p>
+    <p ${pS}>&nbsp;</p>
+    <p ${pS}><strong>Senthil R</strong><br>Tech Lead<br>Precision Biometric India Pvt. Ltd.<br>M +91 8072730101<br><a href="http://www.precisionit.co.in" style="color:#0563c1;">www.precisionit.co.in</a></p>`;
+}
+
+function copyPendingMailHtml() {
+  const preview = document.getElementById('pendingMailPreview');
+  const html = preview.innerHTML;
+  try {
+    const blob = new Blob([html], { type: 'text/html' });
+    const item = new ClipboardItem({ 'text/html': blob });
+    navigator.clipboard.write([item]).then(() => {
+      showToast('Pending report copied! Paste into Outlook (Ctrl+V)', 'success');
+    }).catch(() => fallbackCopy(preview));
+  } catch(e) {
+    fallbackCopy(preview);
+  }
+}
+
+function openPendingInOutlook() {
+  const to      = encodeURIComponent(document.getElementById('pMailTo').value);
+  const cc      = encodeURIComponent(document.getElementById('pMailCc').value);
+  const subject = encodeURIComponent(document.getElementById('pMailSubject').value);
+  window.location.href = `mailto:${to}?cc=${cc}&subject=${subject}`;
 }
 
 

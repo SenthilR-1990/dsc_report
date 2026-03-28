@@ -583,7 +583,10 @@ def get_stats():
             FROM v_incidents
         """)
         summary = cur.fetchone()
-        cur.execute("SELECT customer, COUNT(*) AS cnt FROM v_incidents GROUP BY customer ORDER BY cnt DESC")
+        cur.execute("""SELECT customer, COUNT(*) AS cnt,
+                       SUM(status='Closed') AS closed,
+                       SUM(status IN ('Pending','Open')) AS pending
+                       FROM v_incidents GROUP BY customer ORDER BY cnt DESC""")
         by_customer = cur.fetchall()
         cur.execute("SELECT resource, COUNT(*) AS cnt FROM v_incidents GROUP BY resource ORDER BY cnt DESC")
         by_resource = cur.fetchall()
@@ -1321,6 +1324,101 @@ def daily_report():
             "closed":        closed,
             "pending":       pending,
             "by_customer":   summary,
+        })
+    finally:
+        cur.close(); conn.close()
+
+# ── Customer Stats ─────────────────────────────────────────
+@app.route("/api/stats/customer", methods=["GET"])
+@login_required
+def customer_stats():
+    customer_name = request.args.get("name", "").strip()
+    if not customer_name:
+        return err("customer name is required")
+    conn = get_conn()
+    cur  = conn.cursor(dictionary=True)
+    try:
+        cur.execute("""
+            SELECT
+                COUNT(*)                                    AS total,
+                SUM(status='Closed')                        AS closed,
+                SUM(status='Pending')                       AS pending,
+                SUM(status='Open')                          AS open_count,
+                ROUND(SUM(status='Closed')/COUNT(*)*100,1)  AS close_rate,
+                SUM(category='Breakfix')                    AS breakfix,
+                SUM(category='Devlopment Team')             AS dev_team,
+                SUM(category='Integration')                 AS integration
+            FROM v_incidents WHERE customer = %s
+        """, (customer_name,))
+        summary = cur.fetchone()
+
+        cur.execute("""
+            SELECT category, COUNT(*) AS cnt
+            FROM v_incidents WHERE customer = %s
+            GROUP BY category ORDER BY cnt DESC
+        """, (customer_name,))
+        by_category = cur.fetchall()
+
+        cur.execute("""
+            SELECT resource, COUNT(*) AS cnt
+            FROM v_incidents WHERE customer = %s
+            GROUP BY resource ORDER BY cnt DESC
+        """, (customer_name,))
+        by_resource = cur.fetchall()
+
+        cur.execute("""
+            SELECT * FROM v_incidents WHERE customer = %s
+            ORDER BY incident_date DESC LIMIT 10
+        """, (customer_name,))
+        recent = [serialize(r) for r in cur.fetchall()]
+
+        return ok({
+            "customer":    customer_name,
+            "summary":     summary,
+            "by_category": by_category,
+            "by_resource": by_resource,
+            "recent":      recent,
+        })
+    finally:
+        cur.close(); conn.close()
+
+# ── Pending Report ────────────────────────────────────────
+@app.route("/api/incidents/pending-report", methods=["GET"])
+@login_required
+def pending_report():
+    report_date = request.args.get("date", date.today().isoformat())
+    try:
+        datetime.strptime(report_date, "%Y-%m-%d")
+    except ValueError:
+        return err("Invalid date format — use YYYY-MM-DD")
+
+    conn = get_conn()
+    cur  = conn.cursor(dictionary=True)
+    try:
+        # Today's pending calls
+        cur.execute(
+            """SELECT * FROM v_incidents
+               WHERE status IN ('Pending', 'Open')
+               AND incident_date = %s
+               ORDER BY customer, category, id""",
+            (report_date,)
+        )
+        today_pending = [serialize(r) for r in cur.fetchall()]
+
+        # Overall pending calls (all dates)
+        cur.execute(
+            """SELECT * FROM v_incidents
+               WHERE status IN ('Pending', 'Open')
+               ORDER BY customer, category, incident_date, id"""
+        )
+        overall_pending = [serialize(r) for r in cur.fetchall()]
+
+        return ok({
+            "report_date":    report_date,
+            "today_pending":  today_pending,
+            "overall_pending": overall_pending,
+            "today_count":    len(today_pending),
+            "overall_count":  len(overall_pending),
         })
     finally:
         cur.close(); conn.close()
