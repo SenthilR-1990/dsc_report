@@ -759,6 +759,7 @@ def _list_incidents():
     offset   = (page - 1) * per_page
     status   = request.args.get("status", "")
     category = request.args.get("category", "")
+    customer = request.args.get("customer", "").strip()
     search   = request.args.get("search", "").strip()
     date_from= request.args.get("date_from", "")
     date_to  = request.args.get("date_to", "")
@@ -772,6 +773,8 @@ def _list_incidents():
         where.append("status = %s"); params.append(status)
     if category:
         where.append("category = %s"); params.append(category)
+    if customer:
+        where.append("customer LIKE %s"); params.append(f"%{customer}%")
     if search:
         where.append("(issue_reported LIKE %s OR action_taken LIKE %s OR remarks LIKE %s)")
         like = f"%{search}%"; params.extend([like, like, like])

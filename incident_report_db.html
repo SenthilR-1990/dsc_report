@@ -4,42 +4,42 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DSC Incident Tracker</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#0d0f14;--surface:#151820;--surface2:#1c2030;--border:#252b3b;--accent:#4f9eff;--accent2:#7c5cff;--green:#22c97a;--orange:#ff8c42;--red:#ff4d6d;--yellow:#ffd166;--text:#e8eaf0;--muted:#6b7594}
+:root{--bg:#050e1a;--surface:#0a1628;--surface2:#0f2040;--border:#1a3355;--accent:#00d4ff;--accent2:#0099cc;--green:#00e5a0;--orange:#ff9f43;--red:#ff6b6b;--yellow:#ffd93d;--text:#d0e8ff;--muted:#5a8aaa}
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:var(--bg);color:var(--text);font-family:'Sora',sans-serif;font-size:13px;line-height:1.5;min-height:100vh}
-body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.25;pointer-events:none;z-index:0}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:13px;line-height:1.5;min-height:100vh}
+body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(ellipse at 20% 50%,rgba(0,212,255,.04) 0%,transparent 60%),radial-gradient(ellipse at 80% 20%,rgba(0,153,204,.05) 0%,transparent 50%);pointer-events:none;z-index:0}
 
 /* ── Login Screen ── */
 #loginScreen{position:fixed;inset:0;z-index:500;display:flex;align-items:center;justify-content:center;background:var(--bg)}
-#loginScreen::before{content:'';position:absolute;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.25}
-.login-box{position:relative;z-index:1;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:40px;width:380px;box-shadow:0 24px 80px rgba(0,0,0,.5)}
+#loginScreen::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 30% 40%,rgba(0,212,255,.08) 0%,transparent 60%),radial-gradient(ellipse at 70% 70%,rgba(0,153,204,.06) 0%,transparent 50%)}
+.login-box{position:relative;z-index:1;background:rgba(10,22,40,.9);border:1px solid rgba(0,212,255,.2);border-radius:16px;padding:40px;width:380px;box-shadow:0 24px 80px rgba(0,0,0,.6),0 0 40px rgba(0,212,255,.05)}
 .login-logo{text-align:center;margin-bottom:28px}
 .login-logo h1{font-size:22px;font-weight:700;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 .login-logo p{color:var(--muted);font-size:12px;margin-top:4px}
 .login-box .form-group{margin-bottom:16px}
 .login-box label{display:block;font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
-.login-box input{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;font-family:'Sora',sans-serif;font-size:13px;outline:none;transition:border-color .15s}
+.login-box input{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;font-family:'Inter',sans-serif;font-size:13px;outline:none;transition:border-color .15s}
 .login-box input:focus{border-color:var(--accent)}
-.login-btn{width:100%;padding:11px;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:8px;color:#fff;font-family:'Sora',sans-serif;font-size:13px;font-weight:600;cursor:pointer;margin-top:8px;transition:opacity .15s}
+.login-btn{width:100%;padding:11px;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:8px;color:#fff;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;margin-top:8px;transition:opacity .15s}
 .login-btn:hover{opacity:.88}
 .login-err{color:var(--red);font-size:11px;text-align:center;margin-top:10px;min-height:16px}
 
 /* ── App Shell ── */
 #appShell{display:none;position:relative;z-index:1}
-.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 32px;display:flex;align-items:center;height:52px;gap:16px;position:sticky;top:0;z-index:50}
+.topbar{background:rgba(5,14,26,.95);border-bottom:1px solid rgba(0,212,255,.15);padding:0 32px;display:flex;align-items:center;height:52px;gap:16px;position:sticky;top:0;z-index:50;backdrop-filter:blur(10px)}
 .topbar-brand{font-weight:700;font-size:15px;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-right:auto}
 .topbar-user{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--muted)}
 .role-badge{padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;letter-spacing:.5px;text-transform:uppercase}
-.role-admin{background:rgba(255,209,102,.15);color:var(--yellow);border:1px solid rgba(255,209,102,.3)}
-.role-user {background:rgba(79,158,255,.12);color:var(--accent);border:1px solid rgba(79,158,255,.25)}
-.logout-btn{background:none;border:1px solid var(--border);color:var(--muted);padding:4px 12px;border-radius:6px;font-family:'Sora',sans-serif;font-size:11px;cursor:pointer;transition:all .15s}
+.role-admin{background:rgba(0,212,255,.1);color:var(--accent);border:1px solid rgba(0,212,255,.2)}
+.role-user {background:rgba(0,212,255,.1);color:var(--accent);border:1px solid rgba(79,158,255,.25)}
+.logout-btn{background:none;border:1px solid var(--border);color:var(--muted);padding:4px 12px;border-radius:6px;font-family:'Inter',sans-serif;font-size:11px;cursor:pointer;transition:all .15s}
 .logout-btn:hover{border-color:var(--red);color:var(--red)}
 
 /* ── Tabs ── */
 .tabs{display:flex;gap:2px;background:var(--surface2);padding:4px;border-radius:8px;width:fit-content}
-.tab-btn{background:none;border:none;color:var(--muted);padding:5px 16px;border-radius:6px;font-family:'Sora',sans-serif;font-size:12px;cursor:pointer;transition:all .15s}
+.tab-btn{background:none;border:none;color:var(--muted);padding:5px 16px;border-radius:6px;font-family:'Inter',sans-serif;font-size:12px;cursor:pointer;transition:all .15s}
 .tab-btn.active{background:var(--surface);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.3)}
 
 .page{max-width:1400px;margin:0 auto;padding:28px 32px}
@@ -48,6 +48,8 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:12px;margin-bottom:24px}
 .kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;position:relative;overflow:hidden;transition:transform .2s}
 .kpi-card:hover{transform:translateY(-2px)}
+.kpi-card[onclick]{cursor:pointer}
+.kpi-card[onclick]:hover{border-color:var(--accent);box-shadow:0 4px 24px rgba(0,212,255,.18),0 0 0 1px rgba(0,212,255,.08)}
 .kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
 .kpi-card.blue::before{background:linear-gradient(90deg,var(--accent),var(--accent2))}
 .kpi-card.green::before{background:linear-gradient(90deg,var(--green),#16dba0)}
@@ -65,7 +67,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 
 /* ── Charts ── */
 .charts-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px}
-.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px}
+.chart-card{background:var(--surface);border:1px solid rgba(0,212,255,.1);border-radius:10px;padding:16px}
 .chart-title{font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
 .bar-group{display:flex;flex-direction:column;gap:8px}
 .bar-row{display:flex;align-items:center;gap:9px}
@@ -75,9 +77,9 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .bar-count{width:30px;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)}
 
 /* ── Customer Dashboard Sections ── */
-.cust-section{border-radius:12px;padding:16px;margin-bottom:16px;border:1px solid var(--border)}
-.cust-section.speedsign{border-color:#ff8c42;background:linear-gradient(135deg,rgba(255,140,66,.08),rgba(255,209,102,.04));position:relative;overflow:hidden}
-.cust-section.speedsign::before{content:'⚡ SPEED SIGN';position:absolute;top:10px;right:14px;font-size:9px;font-weight:700;letter-spacing:2px;color:#ff8c42;opacity:.6}
+.cust-section{border-radius:12px;padding:16px;margin-bottom:16px;border:1px solid rgba(0,212,255,.1)}
+.cust-section.speedsign{border-color:#ff9f43;background:linear-gradient(135deg,rgba(255,159,67,.07),rgba(255,217,61,.03));position:relative;overflow:hidden}
+.cust-section.speedsign::before{content:'⚡ SPEED SIGN';position:absolute;top:10px;right:14px;font-size:9px;font-weight:700;letter-spacing:2px;color:#ff9f43;opacity:.6}
 .cust-section.others{background:var(--surface)}
 .cust-section-title{font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:8px}
 .cust-section.speedsign .cust-section-title{color:#ff8c42}
@@ -95,7 +97,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .cust-click-hint{font-size:9px;color:var(--muted);margin-top:4px;opacity:.7}
 
 /* ── Customer Report Modal ── */
-.cust-modal{background:var(--surface);border-radius:14px;width:92vw;max-width:900px;max-height:88vh;overflow-y:auto;padding:28px;position:relative}
+.cust-modal{background:var(--surface);border:1px solid rgba(0,212,255,.15);border-radius:14px;width:92vw;max-width:900px;max-height:88vh;overflow-y:auto;padding:28px;position:relative}
 .cust-modal-header{display:flex;align-items:center;gap:12px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)}
 .cust-modal-name{font-size:20px;font-weight:700}
 .cust-modal-badge{font-size:10px;font-weight:700;letter-spacing:1px;padding:3px 10px;border-radius:20px;text-transform:uppercase}
@@ -110,43 +112,43 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 
 /* ── Toolbar ── */
 .toolbar{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
-.filter-btn{background:var(--surface);border:1px solid var(--border);color:var(--muted);padding:5px 12px;border-radius:6px;font-family:'Sora',sans-serif;font-size:11px;cursor:pointer;transition:all .15s}
-.filter-btn:hover,.filter-btn.active{background:rgba(79,158,255,.12);border-color:var(--accent);color:var(--accent)}
-.search-box{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:6px;font-family:'Sora',sans-serif;font-size:12px;outline:none;width:200px;transition:border-color .15s}
+.filter-btn{background:var(--surface);border:1px solid var(--border);color:var(--muted);padding:5px 12px;border-radius:6px;font-family:'Inter',sans-serif;font-size:11px;cursor:pointer;transition:all .15s}
+.filter-btn:hover,.filter-btn.active{background:rgba(0,212,255,.1);border-color:var(--accent);color:var(--accent)}
+.search-box{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:6px;font-family:'Inter',sans-serif;font-size:12px;outline:none;width:200px;transition:border-color .15s}
 .search-box::placeholder{color:var(--muted)}
 .search-box:focus{border-color:var(--accent)}
 .ml-auto{margin-left:auto}
-.btn{padding:7px 16px;border-radius:6px;font-family:'Sora',sans-serif;font-size:12px;font-weight:600;cursor:pointer;border:none;transition:all .15s}
-.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
+.btn{padding:7px 16px;border-radius:6px;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;cursor:pointer;border:none;transition:all .15s}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#000;font-weight:600}
 .btn-primary:hover{opacity:.85}
 .btn-danger{background:var(--red);color:#fff}
-.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--muted)}
+.btn-ghost{background:transparent;border:1px solid rgba(0,212,255,.2);color:var(--muted)}
 .btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
 .btn-green{background:linear-gradient(135deg,var(--green),#16dba0);color:#fff}
 .btn-mail{background:linear-gradient(135deg,#0078d4,#106ebe);color:#fff}
 .btn-mail:hover{opacity:.85}
 
 /* ── Mail Modal ── */
-.mail-modal{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:0;width:860px;max-width:96vw;max-height:92vh;display:flex;flex-direction:column;position:relative}
+.mail-modal{background:var(--surface);border:1px solid rgba(0,212,255,.15);border-radius:12px;padding:0;width:860px;max-width:96vw;max-height:92vh;display:flex;flex-direction:column;position:relative}
 .mail-modal-header{padding:20px 24px 14px;border-bottom:1px solid var(--border);flex-shrink:0}
 .mail-modal-header h2{font-size:15px;font-weight:600;margin-bottom:12px}
 .mail-meta{display:grid;grid-template-columns:auto 1fr;gap:5px 12px;font-size:12px}
 .mail-meta-label{color:var(--muted);font-weight:600;text-transform:uppercase;font-size:10px;letter-spacing:.8px;padding-top:2px}
 .mail-meta-val{color:var(--text)}
-.mail-meta-val input{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:4px 10px;border-radius:5px;font-family:'Sora',sans-serif;font-size:12px;outline:none;width:100%;transition:border-color .15s}
+.mail-meta-val input{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:4px 10px;border-radius:5px;font-family:'Inter',sans-serif;font-size:12px;outline:none;width:100%;transition:border-color .15s}
 .mail-meta-val input:focus{border-color:var(--accent)}
 .mail-body-wrap{flex:1;overflow-y:auto;padding:20px 24px}
 .mail-preview{background:#fff;border-radius:8px;padding:20px 24px;font-family:Calibri,Arial,sans-serif;font-size:13px;color:#000;line-height:1.6;min-height:200px}
 .mail-modal-footer{padding:14px 24px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0;flex-wrap:wrap}
 .mail-date-row{display:flex;align-items:center;gap:8px;margin-right:auto;font-size:12px;color:var(--muted)}
-.mail-date-row input{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:4px 10px;border-radius:5px;font-family:'Sora',sans-serif;font-size:12px;outline:none;transition:border-color .15s}
+.mail-date-row input{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:4px 10px;border-radius:5px;font-family:'Inter',sans-serif;font-size:12px;outline:none;transition:border-color .15s}
 .mail-date-row input:focus{border-color:var(--accent)}
 
 /* ── Table ── */
-.table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.table-wrap{background:var(--surface);border:1px solid rgba(0,212,255,.1);border-radius:12px;overflow:hidden}
 .table-scroll{overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:12px}
-thead tr{background:var(--surface2);border-bottom:1px solid var(--border)}
+thead tr{background:linear-gradient(135deg,#0a1e3a,#0d2545);border-bottom:1px solid rgba(0,212,255,.15)}
 th{padding:10px 12px;text-align:left;font-size:10px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);white-space:nowrap;cursor:pointer;user-select:none}
 th:hover{color:var(--accent)}
 tbody tr{border-bottom:1px solid rgba(37,43,59,.7);transition:background .15s}
@@ -155,10 +157,10 @@ tbody tr:hover{background:rgba(79,158,255,.04)}
 td{padding:9px 12px;vertical-align:top}
 .sno{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)}
 .customer-tag{display:inline-block;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:600;white-space:nowrap}
-.tag-emudhra{background:rgba(79,158,255,.15);color:#7eb8ff}
-.tag-pantasign{background:rgba(124,92,255,.15);color:#b09aff}
-.tag-speedsign{background:rgba(34,201,122,.15);color:#5ddba0}
-.tag-verasys{background:rgba(255,140,66,.15);color:#ffb070}
+.tag-emudhra{background:rgba(0,212,255,.12);color:#00d4ff}
+.tag-pantasign{background:rgba(0,180,220,.12);color:#00bce0}
+.tag-speedsign{background:rgba(0,229,160,.12);color:#00e5a0}
+.tag-verasys{background:rgba(255,159,67,.12);color:#ff9f43}
 .cat-tag{display:inline-block;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:600}
 .cat-breakfix{background:rgba(79,158,255,.1);color:var(--accent)}
 .cat-dev{background:rgba(255,209,102,.12);color:var(--yellow)}
@@ -172,7 +174,7 @@ td{padding:9px 12px;vertical-align:top}
 .status-pending{background:rgba(255,140,66,.12);color:var(--orange);border:1px solid rgba(255,140,66,.25)}
 .status-open{background:rgba(255,77,109,.12);color:var(--red);border:1px solid rgba(255,77,109,.25)}
 .status-dot{width:5px;height:5px;border-radius:50%;background:currentColor}
-.model-pill{display:inline-block;padding:1px 6px;border-radius:4px;font-family:'DM Mono',monospace;font-size:10px;background:rgba(79,158,255,.08);color:var(--accent);border:1px solid rgba(79,158,255,.2)}
+.model-pill{display:inline-block;padding:1px 6px;border-radius:4px;font-family:'DM Mono',monospace;font-size:10px;background:rgba(0,212,255,.08);color:var(--accent);border:1px solid rgba(0,212,255,.18)}
 .remarks-text{max-width:150px;font-size:10px;color:var(--muted);font-style:italic;line-height:1.4}
 .action-icons{display:flex;gap:5px}
 .icon-btn{background:none;border:1px solid var(--border);border-radius:5px;color:var(--muted);padding:3px 7px;cursor:pointer;font-size:11px;transition:all .15s}
@@ -183,21 +185,21 @@ td{padding:9px 12px;vertical-align:top}
 .pagination{display:flex;align-items:center;justify-content:space-between;margin-top:14px}
 .pag-info{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace}
 .pag-btns{display:flex;gap:5px}
-.pag-btn{background:var(--surface);border:1px solid var(--border);color:var(--muted);padding:4px 12px;border-radius:6px;font-family:'Sora',sans-serif;font-size:11px;cursor:pointer;transition:all .15s}
+.pag-btn{background:var(--surface);border:1px solid var(--border);color:var(--muted);padding:4px 12px;border-radius:6px;font-family:'Inter',sans-serif;font-size:11px;cursor:pointer;transition:all .15s}
 .pag-btn:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
 .pag-btn:disabled{opacity:.35;cursor:default}
-.pag-btn.active{background:rgba(79,158,255,.15);border-color:var(--accent);color:var(--accent)}
+.pag-btn.active{background:rgba(0,212,255,.12);border-color:var(--accent);color:var(--accent)}
 
 /* ── Modal ── */
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:center;justify-content:center}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,5,15,.8);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center}
 .modal-overlay.open{display:flex}
-.modal{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:28px;width:620px;max-width:95vw;max-height:90vh;overflow-y:auto;position:relative}
+.modal{background:var(--surface);border:1px solid rgba(0,212,255,.15);border-radius:12px;padding:28px;width:620px;max-width:95vw;max-height:90vh;overflow-y:auto;position:relative;box-shadow:0 24px 60px rgba(0,0,0,.6),0 0 40px rgba(0,212,255,.04)}
 .modal h2{font-size:16px;font-weight:600;margin-bottom:18px}
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .form-grid .full{grid-column:1/-1}
 .form-group{display:flex;flex-direction:column;gap:5px}
 .form-group label{font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
-.form-group input,.form-group select,.form-group textarea{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:6px;font-family:'Sora',sans-serif;font-size:12px;outline:none;transition:border-color .15s;width:100%}
+.form-group input,.form-group select,.form-group textarea{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:6px;font-family:'Inter',sans-serif;font-size:12px;outline:none;transition:border-color .15s;width:100%}
 .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--accent)}
 .form-group textarea{resize:vertical;min-height:56px}
 .form-group select option{background:var(--surface2)}
@@ -206,9 +208,9 @@ td{padding:9px 12px;vertical-align:top}
 .close-modal:hover{color:var(--text)}
 
 /* ── Admin Panel ── */
-.admin-section{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:20px}
+.admin-section{background:var(--surface);border:1px solid rgba(0,212,255,.1);border-radius:12px;padding:24px;margin-bottom:20px}
 .admin-section h3{font-size:14px;font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:8px}
-.admin-badge{font-size:10px;padding:2px 8px;border-radius:4px;background:rgba(255,209,102,.15);color:var(--yellow);border:1px solid rgba(255,209,102,.3);font-weight:600;letter-spacing:.5px}
+.admin-badge{font-size:10px;padding:2px 8px;border-radius:4px;background:rgba(0,212,255,.1);color:var(--accent);border:1px solid rgba(0,212,255,.2);font-weight:600;letter-spacing:.5px}
 
 /* ── Upload area ── */
 .upload-zone{border:2px dashed var(--border);border-radius:10px;padding:40px;text-align:center;transition:all .2s;cursor:pointer;position:relative}
@@ -222,7 +224,7 @@ td{padding:9px 12px;vertical-align:top}
 .upload-result.error{border-left:3px solid var(--red)}
 .upload-result .stat{display:flex;justify-content:space-between;margin-bottom:4px}
 .upload-result .errs{margin-top:8px;color:var(--red);font-size:11px;font-family:'DM Mono',monospace;max-height:120px;overflow-y:auto}
-.template-hint{margin-top:14px;padding:12px;background:rgba(79,158,255,.06);border:1px solid rgba(79,158,255,.15);border-radius:8px;font-size:11px;color:var(--muted)}
+.template-hint{margin-top:14px;padding:12px;background:rgba(79,158,255,.06);border:1px solid rgba(0,212,255,.12);border-radius:8px;font-size:11px;color:var(--muted)}
 .template-hint strong{color:var(--accent)}
 
 /* ── Users table ── */
@@ -256,7 +258,7 @@ td{padding:9px 12px;vertical-align:top}
 .home-title{font-size:22px;font-weight:700;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-align:center;position:relative;z-index:1}
 .home-subtitle{color:var(--muted);font-size:12px;margin-top:-20px;position:relative;z-index:1}
 .home-tiles{display:flex;gap:24px;position:relative;z-index:1;flex-wrap:wrap;justify-content:center}
-.home-tile{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:40px 48px;cursor:pointer;transition:all .25s;text-align:center;min-width:220px;position:relative;overflow:hidden}
+.home-tile{background:var(--surface);border:1px solid rgba(0,212,255,.12);border-radius:16px;padding:40px 48px;cursor:pointer;transition:all .25s;text-align:center;min-width:220px;position:relative;overflow:hidden}
 .home-tile::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;transition:opacity .25s}
 .home-tile.tile-blue::before{background:linear-gradient(90deg,var(--accent),var(--accent2))}
 .home-tile.tile-green::before{background:linear-gradient(90deg,var(--green),#16dba0)}
@@ -269,9 +271,9 @@ td{padding:9px 12px;vertical-align:top}
 
 /* ── Integration Shell ── */
 #integrationShell{display:none;position:relative;z-index:1}
-.int-topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 32px;display:flex;align-items:center;height:52px;gap:16px;position:sticky;top:0;z-index:50}
+.int-topbar{background:rgba(5,14,26,.95);border-bottom:1px solid rgba(0,212,255,.15);padding:0 32px;display:flex;align-items:center;height:52px;gap:16px;position:sticky;top:0;z-index:50}
 .int-brand{font-weight:700;font-size:15px;background:linear-gradient(135deg,#fff 30%,var(--green));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-right:auto}
-.back-btn{background:none;border:1px solid var(--border);color:var(--muted);padding:4px 12px;border-radius:6px;font-family:'Sora',sans-serif;font-size:11px;cursor:pointer;transition:all .15s}
+.back-btn{background:none;border:1px solid var(--border);color:var(--muted);padding:4px 12px;border-radius:6px;font-family:'Inter',sans-serif;font-size:11px;cursor:pointer;transition:all .15s}
 .back-btn:hover{border-color:var(--accent);color:var(--accent)}
 
 /* ── Integration Content ── */
@@ -280,7 +282,7 @@ td{padding:9px 12px;vertical-align:top}
 .int-stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:24px}
 
 /* Integration table panels */
-.int-section{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:20px}
+.int-section{background:var(--surface);border:1px solid rgba(0,212,255,.1);border-radius:12px;padding:20px;margin-bottom:20px}
 .int-section-title{font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-bottom:14px;display:flex;align-items:center;gap:8px}
 .int-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
 .int-card{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px}
@@ -292,7 +294,7 @@ td{padding:9px 12px;vertical-align:top}
 .badge-completed{background:rgba(34,201,122,.12);color:var(--green);border:1px solid rgba(34,201,122,.3)}
 .badge-pending{background:rgba(255,77,109,.12);color:var(--red);border:1px solid rgba(255,77,109,.25)}
 .badge-partial{background:rgba(255,209,102,.12);color:var(--yellow);border:1px solid rgba(255,209,102,.3)}
-.badge-progress{background:rgba(79,158,255,.12);color:var(--accent);border:1px solid rgba(79,158,255,.25)}
+.badge-progress{background:rgba(0,212,255,.1);color:var(--accent);border:1px solid rgba(79,158,255,.25)}
 .badge-resolved{background:rgba(34,201,122,.12);color:var(--green);border:1px solid rgba(34,201,122,.3)}
 .badge-unresolved{background:rgba(255,77,109,.12);color:var(--red);border:1px solid rgba(255,77,109,.25)}
 .badge-integration{background:rgba(124,92,255,.12);color:#b09aff;border:1px solid rgba(124,92,255,.3)}
@@ -307,7 +309,7 @@ td{padding:9px 12px;vertical-align:top}
 .issue-table tr:hover td{background:rgba(79,158,255,.03)}
 .issue-cell{max-width:320px;line-height:1.5;color:var(--text)}
 .remarks-cell{max-width:260px;line-height:1.5;color:#8d9ab8;font-size:11px}
-.int-search{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:6px;font-family:'Sora',sans-serif;font-size:12px;outline:none;width:220px;transition:border-color .15s;margin-bottom:14px}
+.int-search{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:6px;font-family:'Inter',sans-serif;font-size:12px;outline:none;width:220px;transition:border-color .15s;margin-bottom:14px}
 .int-search:focus{border-color:var(--accent)}
 .int-filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
 </style>
@@ -498,17 +500,50 @@ td{padding:9px 12px;vertical-align:top}
   <div id="tabDashboard" class="page">
     <!-- Overall KPIs -->
     <div class="kpi-grid">
-      <div class="kpi-card blue"><div class="kpi-label">Total Calls</div><div class="kpi-value" id="kpiTotal">—</div><div class="kpi-sub" id="kpiOpenCount">—</div></div>
-      <div class="kpi-card green"><div class="kpi-label">Closed</div><div class="kpi-value" id="kpiClosed">—</div><div class="kpi-sub" id="kpiCloseRate">—</div></div>
-      <div class="kpi-card orange"><div class="kpi-label">Pending</div><div class="kpi-value" id="kpiPending">—</div><div class="kpi-sub">Awaiting resolution</div></div>
-      <div class="kpi-card blue"><div class="kpi-label">Breakfix</div><div class="kpi-value" id="kpiBreakfix">—</div><div class="kpi-sub">Most common type</div></div>
-      <div class="kpi-card purple"><div class="kpi-label">Integration</div><div class="kpi-value" id="kpiIntegration">—</div><div class="kpi-sub">Needs dev support</div></div>
-      <div class="kpi-card red"><div class="kpi-label">Same-Day</div><div class="kpi-value" id="kpiSameDay">—</div><div class="kpi-sub">Closure rate</div></div>
+      <div class="kpi-card blue" onclick="navigateToIncidents('','','')" style="cursor:pointer" title="View all incidents"><div class="kpi-label">Total Calls</div><div class="kpi-value" id="kpiTotal">—</div><div class="kpi-sub" id="kpiOpenCount">—</div></div>
+      <div class="kpi-card green" onclick="navigateToIncidents('status','Closed','')" style="cursor:pointer" title="View closed incidents"><div class="kpi-label">Closed</div><div class="kpi-value" id="kpiClosed">—</div><div class="kpi-sub" id="kpiCloseRate">—</div></div>
+      <div class="kpi-card orange" onclick="navigateToIncidents('status','Pending','')" style="cursor:pointer" title="View pending incidents"><div class="kpi-label">Pending</div><div class="kpi-value" id="kpiPending">—</div><div class="kpi-sub">Awaiting resolution</div></div>
+      <div class="kpi-card blue" onclick="navigateToIncidents('category','Breakfix','')" style="cursor:pointer" title="View Breakfix incidents"><div class="kpi-label">Breakfix</div><div class="kpi-value" id="kpiBreakfix">—</div><div class="kpi-sub">Most common type</div></div>
+      <div class="kpi-card purple" onclick="navigateToIncidents('category','Integration','')" style="cursor:pointer" title="View Integration incidents"><div class="kpi-label">Integration</div><div class="kpi-value" id="kpiIntegration">—</div><div class="kpi-sub">Needs dev support</div></div>
+      <div class="kpi-card red" style="cursor:default"><div class="kpi-label">Same-Day</div><div class="kpi-value" id="kpiSameDay">—</div><div class="kpi-sub">Closure rate</div></div>
     </div>
 
     <!-- Speed Sign Highlighted Section -->
     <div class="cust-section speedsign">
       <div class="cust-section-title">⚡ Speed Sign Customer</div>
+      <!-- Speed Sign KPI Row -->
+      <div class="kpi-grid" id="ssKpiRow" style="margin-bottom:14px">
+        <div class="kpi-card" style="border-color:rgba(255,140,66,.3);cursor:pointer" id="ssTotalCard" onclick="" title="View all Speed Sign incidents">
+          <div class="kpi-label" style="color:#ff8c42">Total Calls</div>
+          <div class="kpi-value" id="ssTotalVal" style="color:#ff8c42">—</div>
+          <div class="kpi-sub" id="ssTotalSub">—</div>
+        </div>
+        <div class="kpi-card" style="border-color:rgba(34,201,122,.3);cursor:pointer" id="ssClosedCard" onclick="" title="View closed Speed Sign incidents">
+          <div class="kpi-label" style="color:var(--green)">Closed</div>
+          <div class="kpi-value" id="ssClosedVal" style="color:var(--green)">—</div>
+          <div class="kpi-sub" id="ssCloseRate">—</div>
+        </div>
+        <div class="kpi-card" style="border-color:rgba(255,140,66,.3);cursor:pointer" id="ssPendingCard" onclick="" title="View pending Speed Sign incidents">
+          <div class="kpi-label" style="color:var(--orange)">Pending</div>
+          <div class="kpi-value" id="ssPendingVal" style="color:var(--orange)">—</div>
+          <div class="kpi-sub">Awaiting resolution</div>
+        </div>
+        <div class="kpi-card" style="border-color:rgba(79,158,255,.3);cursor:pointer" id="ssBreakfixCard" onclick="" title="View Breakfix Speed Sign incidents">
+          <div class="kpi-label" style="color:var(--accent)">Breakfix</div>
+          <div class="kpi-value" id="ssBreakfixVal" style="color:var(--accent)">—</div>
+          <div class="kpi-sub">Category</div>
+        </div>
+        <div class="kpi-card" style="border-color:rgba(124,92,255,.3);cursor:pointer" id="ssIntegrationCard" onclick="" title="View Integration Speed Sign incidents">
+          <div class="kpi-label" style="color:var(--accent2)">Integration</div>
+          <div class="kpi-value" id="ssIntegrationVal" style="color:var(--accent2)">—</div>
+          <div class="kpi-sub">Needs dev support</div>
+        </div>
+        <div class="kpi-card" style="border-color:rgba(255,77,109,.3)">
+          <div class="kpi-label" style="color:var(--red)">Same-Day</div>
+          <div class="kpi-value" id="ssSameDayVal" style="color:var(--red)">—</div>
+          <div class="kpi-sub">Closure rate</div>
+        </div>
+      </div>
       <div id="speedSignCards" class="cust-mini-grid"><div style="color:var(--muted);font-size:11px">Loading…</div></div>
       <div class="charts-row" style="margin-bottom:0">
         <div class="chart-card"><div class="chart-title">Category Breakdown</div><div class="bar-group" id="ssCategory"><div style="color:var(--muted);font-size:11px">Loading…</div></div></div>
@@ -664,7 +699,10 @@ td{padding:9px 12px;vertical-align:top}
         <div class="cust-modal-name" id="custModalName">Customer</div>
         <div style="font-size:11px;color:var(--muted);margin-top:2px" id="custModalSub">Loading…</div>
       </div>
-      <span class="cust-modal-badge" id="custModalBadge" style="background:rgba(79,158,255,.15);color:var(--accent)">Customer</span>
+      <div style="display:flex;align-items:center;gap:10px;margin-left:auto">
+        <span class="cust-modal-badge" id="custModalBadge" style="background:rgba(0,212,255,.12);color:var(--accent)">Customer</span>
+        <button class="btn btn-ghost" id="custModalViewAllBtn" onclick="" style="font-size:11px;padding:5px 12px">📋 View All Incidents</button>
+      </div>
     </div>
     <div class="cust-kpi-row" id="custModalKpis"></div>
     <div class="charts-row">
@@ -764,7 +802,7 @@ td{padding:9px 12px;vertical-align:top}
 <!-- ── Session Expiry Warning Banner ── -->
 <div id="sessionWarning" style="display:none;position:fixed;top:52px;left:0;right:0;z-index:100;background:rgba(255,140,66,.12);border-bottom:1px solid rgba(255,140,66,.4);padding:10px 32px;display:none;align-items:center;justify-content:center;gap:16px;font-size:12px;color:var(--orange)">
   <span>⚠ Your session expires in <strong id="sessionCountdown">—</strong>. Unsaved work will be lost.</span>
-  <button onclick="extendSession()" style="background:var(--orange);border:none;color:#fff;padding:4px 14px;border-radius:6px;font-family:'Sora',sans-serif;font-size:11px;font-weight:600;cursor:pointer">Extend Session</button>
+  <button onclick="extendSession()" style="background:var(--orange);border:none;color:#fff;padding:4px 14px;border-radius:6px;font-family:'Inter',sans-serif;font-size:11px;font-weight:600;cursor:pointer">Extend Session</button>
   <button onclick="document.getElementById('sessionWarning').style.display='none'" style="background:none;border:none;color:var(--orange);cursor:pointer;font-size:16px;line-height:1">✕</button>
 </div>
 
@@ -777,7 +815,7 @@ let AUTH = { token: null, role: null, username: null, full_name: null, can_delet
 let state = {
   page:1, perPage:50, total:0, totalPages:1,
   sort:'incident_date', order:'desc',
-  filters:{ status:'', category:'', search:'', date_from:'', date_to:'' },
+  filters:{ status:'', category:'', customer:'', search:'', date_from:'', date_to:'' },
   lookups:{ customers:[], categories:[], resources:[] }
 };
 let searchTimer = null;
@@ -1065,6 +1103,88 @@ function showTab(name, btn) {
 }
 function cap(s) { return s[0].toUpperCase()+s.slice(1); }
 
+// ── Navigate from dashboard to incidents with filter ──────────
+function _switchToIncidentsTab() {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  const incBtn = document.querySelector('.tab-btn[onclick*="incidents"]');
+  if (incBtn) incBtn.classList.add('active');
+  ['dashboard','incidents','admin'].forEach(t => {
+    document.getElementById('tab'+cap(t)).style.display = t==='incidents' ? '' : 'none';
+  });
+}
+
+function showCustomerFilterTag(customerName) {
+  // Remove old tag if exists
+  const old = document.getElementById('activeCustomerTag');
+  if (old) old.remove();
+  if (!customerName) return;
+  const toolbar = document.querySelector('#tabIncidents .toolbar');
+  if (!toolbar) return;
+  const tag = document.createElement('span');
+  tag.id = 'activeCustomerTag';
+  tag.style.cssText = 'background:rgba(0,212,255,.12);border:1px solid var(--accent);color:var(--accent);padding:4px 10px;border-radius:6px;font-size:11px;display:flex;align-items:center;gap:6px;white-space:nowrap';
+  tag.innerHTML = `👤 ${customerName} <span onclick="clearCustomerFilter()" style="cursor:pointer;font-size:13px;line-height:1">✕</span>`;
+  toolbar.insertBefore(tag, toolbar.children[1]);
+}
+
+function clearCustomerFilter() {
+  state.filters.customer = '';
+  const old = document.getElementById('activeCustomerTag');
+  if (old) old.remove();
+  const searchBox = document.querySelector('.search-box');
+  if (searchBox) searchBox.value = '';
+  state.page = 1;
+  loadTable();
+}
+
+function navigateToIncidents(filterKey, filterVal, customerName) {
+  _switchToIncidentsTab();
+  state.filters = { status:'', category:'', customer:'', search:'' };
+  state.page = 1;
+  const searchBox = document.querySelector('.search-box');
+  if (searchBox) searchBox.value = '';
+
+  if (filterKey === 'status')   state.filters.status   = filterVal;
+  if (filterKey === 'category') state.filters.category = filterVal;
+  if (filterKey === 'customer') state.filters.customer = customerName;
+
+  document.querySelectorAll('.filter-btn').forEach(b => {
+    b.classList.remove('active');
+    const oc = b.getAttribute('onclick') || '';
+    if (filterKey === 'status'   && oc.includes(`'${filterVal}'`)) b.classList.add('active');
+    if (filterKey === 'category' && oc.includes(`'${filterVal}'`)) b.classList.add('active');
+    if (!filterKey && oc.includes("'status',''")) b.classList.add('active');
+    if (filterKey === 'customer' && oc.includes("'status',''")) b.classList.add('active');
+  });
+
+  showCustomerFilterTag(customerName);
+  loadTable();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function navigateToFilteredCustomer(customerName, status, category) {
+  closeModal('customerReportModal');
+  _switchToIncidentsTab();
+  state.filters = { status: status||'', category: category||'', customer: customerName, search:'' };
+  state.page = 1;
+  const searchBox = document.querySelector('.search-box');
+  if (searchBox) searchBox.value = '';
+
+  document.querySelectorAll('.filter-btn').forEach(b => {
+    b.classList.remove('active');
+    const oc = b.getAttribute('onclick') || '';
+    if (status   && oc.includes(`'${status}'`))   b.classList.add('active');
+    if (category && oc.includes(`'${category}'`)) b.classList.add('active');
+    if (!status && !category && oc.includes("'status',''")) b.classList.add('active');
+  });
+
+  showCustomerFilterTag(customerName);
+  loadTable();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+
+
 // ── Stats ────────────────────────────────────────────────────
 async function loadStats() {
   try {
@@ -1097,13 +1217,13 @@ async function loadStats() {
 
     // Overall resource + customer charts (others section)
     renderBarChart('resourceChart', d.data.by_resource, 'resource',
-      ['linear-gradient(90deg,var(--accent),var(--accent2))',
+      ['linear-gradient(90deg,#00d4ff,#0099cc)',
        'linear-gradient(90deg,var(--green),#16dba0)',
        'linear-gradient(90deg,var(--yellow),var(--orange))',
        'linear-gradient(90deg,var(--orange),#ffb070)',
        'linear-gradient(90deg,#c084fc,var(--accent2))']);
     renderBarChart('customerChart', otherData, 'customer',
-      ['linear-gradient(90deg,var(--accent),var(--accent2))',
+      ['linear-gradient(90deg,#00d4ff,#0099cc)',
        'linear-gradient(90deg,var(--green),#16dba0)',
        'linear-gradient(90deg,#c084fc,#a855f7)',
        'linear-gradient(90deg,var(--orange),#ffb070)']);
@@ -1123,8 +1243,8 @@ function renderCustomerCards(elId, customers, isSpeedSign) {
       <div class="cust-mini-name" title="${esc(c.customer)}">${esc(short)}</div>
       <div class="cust-mini-total">${c.cnt}</div>
       <div class="cust-mini-sub">
-        <span class="cust-mini-closed">✓ ${c.closed||0}</span>
-        <span class="cust-mini-pending">⏳ ${c.pending||0}</span>
+        <span class="cust-mini-closed" onclick="event.stopPropagation();navigateToIncidents('status','Closed','${esc(c.customer)}')" title="View closed" style="cursor:pointer">✓ ${c.closed||0}</span>
+        <span class="cust-mini-pending" onclick="event.stopPropagation();navigateToIncidents('status','Pending','${esc(c.customer)}')" title="View pending" style="cursor:pointer">⏳ ${c.pending||0}</span>
       </div>
       <div class="cust-click-hint">Click for report →</div>
     </div>`;
@@ -1136,6 +1256,27 @@ async function fetchAndRenderCustomerCharts(customerName, catElId, resElId) {
     const r = await apiFetch(`${API}/stats/customer?name=${encodeURIComponent(customerName)}`, { headers: authHeaders() });
     const d = await r.json();
     if (!d.success) return;
+    const s = d.data.summary;
+
+    // ── Populate Speed Sign KPI cards ──────────────────────
+    if (catElId === 'ssCategory') {
+      set('ssTotalVal',      s.total || 0);
+      set('ssTotalSub',      (s.open_count||0) + ' open');
+      set('ssClosedVal',     s.closed || 0);
+      set('ssCloseRate',     (s.close_rate||0) + '% resolution rate');
+      set('ssPendingVal',    s.pending || 0);
+      set('ssBreakfixVal',   s.breakfix || 0);
+      set('ssIntegrationVal',s.integration || 0);
+      set('ssSameDayVal',    (s.same_day_rate||0) + '%');
+
+      // Wire click handlers with customer name
+      document.getElementById('ssTotalCard').onclick      = () => navigateToIncidents('customer','', customerName);
+      document.getElementById('ssClosedCard').onclick     = () => navigateToFilteredCustomer(customerName,'Closed');
+      document.getElementById('ssPendingCard').onclick    = () => navigateToFilteredCustomer(customerName,'Pending');
+      document.getElementById('ssBreakfixCard').onclick   = () => navigateToFilteredCustomer(customerName,'','Breakfix');
+      document.getElementById('ssIntegrationCard').onclick= () => navigateToFilteredCustomer(customerName,'','Integration');
+    }
+
     renderBarChart(catElId, d.data.by_category, 'category',
       ['linear-gradient(90deg,#ff8c42,#ffd166)',
        'linear-gradient(90deg,#ff4d6d,#ff8fa3)',
@@ -1163,12 +1304,17 @@ async function openCustomerReport(customerName) {
     badge.style.color      = '#ff8c42';
     badge.textContent      = '⚡ Speed Sign';
   } else {
-    badge.style.background = 'rgba(79,158,255,.15)';
+    badge.style.background = 'rgba(0,212,255,.12)';
     badge.style.color      = 'var(--accent)';
     badge.textContent      = 'Customer';
   }
 
   document.getElementById('customerReportModal').classList.add('open');
+  // Wire "View All Incidents" button
+  document.getElementById('custModalViewAllBtn').onclick = () => {
+    closeModal('customerReportModal');
+    navigateToIncidents('customer', '', customerName);
+  };
 
   try {
     const r = await apiFetch(`${API}/stats/customer?name=${encodeURIComponent(customerName)}`, { headers: authHeaders() });
@@ -1191,7 +1337,7 @@ async function openCustomerReport(customerName) {
     // Charts
     const colors = isSpeedSign
       ? ['linear-gradient(90deg,#ff8c42,#ffd166)','linear-gradient(90deg,#ff4d6d,#ff8fa3)','linear-gradient(90deg,#c084fc,#a855f7)','linear-gradient(90deg,var(--green),#16dba0)']
-      : ['linear-gradient(90deg,var(--accent),var(--accent2))','linear-gradient(90deg,var(--green),#16dba0)','linear-gradient(90deg,#c084fc,#a855f7)','linear-gradient(90deg,var(--orange),#ffb070)'];
+      : ['linear-gradient(90deg,#00d4ff,#0099cc)','linear-gradient(90deg,var(--green),#16dba0)','linear-gradient(90deg,#c084fc,#a855f7)','linear-gradient(90deg,var(--orange),#ffb070)'];
     renderBarChart('custModalCategoryChart', d.data.by_category, 'category', colors);
     renderBarChart('custModalResourceChart', d.data.by_resource, 'resource', colors);
 
@@ -1259,6 +1405,7 @@ async function loadTable() {
   });
   if (state.filters.status)   params.set('status',   state.filters.status);
   if (state.filters.category) params.set('category', state.filters.category);
+  if (state.filters.customer) params.set('customer', state.filters.customer);
   if (state.filters.search)   params.set('search',   state.filters.search);
   try {
     const r = await apiFetch(`${API}/incidents?${params}`, { headers: authHeaders() });
@@ -1330,6 +1477,10 @@ function setFilter(key, value, btn) {
   state.filters[key] = value;
   if (key==='status')   state.filters.category = '';
   if (key==='category') state.filters.status   = '';
+  // Clear customer filter when toolbar used
+  state.filters.customer = '';
+  const old = document.getElementById('activeCustomerTag');
+  if (old) old.remove();
   state.page = 1; loadTable();
 }
 function debounceSearch(val) {
