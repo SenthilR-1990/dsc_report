@@ -680,12 +680,20 @@ td{padding:9px 12px;vertical-align:top}
       </div>
     </div>
     <div class="mail-modal-footer">
-      <div class="mail-date-row">
-        <span>Report Date:</span>
-        <input type="date" id="mailDate" onchange="loadDailyReport()">
+      <div class="mail-date-row" style="display:flex;align-items:center;gap:8px;margin-right:auto;background:rgba(0,120,212,.08);border:1px solid rgba(0,120,212,.25);border-radius:9px;padding:6px 14px;">
+        <span style="font-size:18px;">📅</span>
+        <span style="font-size:11px;font-weight:700;color:#7eb8f7;text-transform:uppercase;letter-spacing:.8px;white-space:nowrap;">Report Date</span>
+        <input type="date" id="mailDate" onchange="loadDailyReport()"
+          style="background:transparent;border:none;color:#fff;font-size:13px;font-weight:600;outline:none;cursor:pointer;min-width:130px;">
+        <button onclick="document.getElementById('mailDate').showPicker?document.getElementById('mailDate').showPicker():document.getElementById('mailDate').focus()"
+          style="background:rgba(0,120,212,.3);border:1px solid rgba(0,120,212,.4);border-radius:6px;padding:4px 10px;color:#7eb8f7;font-size:11px;cursor:pointer;white-space:nowrap;">
+          🗓 Change Date
+        </button>
       </div>
       <button class="btn btn-ghost" onclick="copyMailHtml()" id="copyMailBtn">📋 Copy Email</button>
-      <button class="btn btn-mail" onclick="openInOutlook()" id="outlookBtn">📧 Open in Outlook</button>
+      <button class="btn btn-mail" onclick="openInOutlook()" id="outlookBtn" style="background:linear-gradient(135deg,#0078d4,#106ebe);min-width:180px;">
+        📧 Send to Outlook Draft
+      </button>
     </div>
   </div>
 </div>
@@ -737,12 +745,20 @@ td{padding:9px 12px;vertical-align:top}
       </div>
     </div>
     <div class="mail-modal-footer">
-      <div class="mail-date-row">
-        <span>Report Date:</span>
-        <input type="date" id="pMailDate" onchange="loadPendingReport()">
+      <div class="mail-date-row" style="display:flex;align-items:center;gap:8px;margin-right:auto;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.25);border-radius:9px;padding:6px 14px;">
+        <span style="font-size:18px;">📅</span>
+        <span style="font-size:11px;font-weight:700;color:#c4b5fd;text-transform:uppercase;letter-spacing:.8px;white-space:nowrap;">Report Date</span>
+        <input type="date" id="pMailDate" onchange="loadPendingReport()"
+          style="background:transparent;border:none;color:#fff;font-size:13px;font-weight:600;outline:none;cursor:pointer;min-width:130px;">
+        <button onclick="document.getElementById('pMailDate').showPicker?document.getElementById('pMailDate').showPicker():document.getElementById('pMailDate').focus()"
+          style="background:rgba(124,58,237,.3);border:1px solid rgba(124,58,237,.4);border-radius:6px;padding:4px 10px;color:#c4b5fd;font-size:11px;cursor:pointer;white-space:nowrap;">
+          🗓 Change Date
+        </button>
       </div>
       <button class="btn btn-ghost" onclick="copyPendingMailHtml()" id="copyPendingMailBtn">📋 Copy Email</button>
-      <button class="btn btn-mail" onclick="openPendingInOutlook()" id="pendingOutlookBtn">📧 Open in Outlook</button>
+      <button class="btn btn-mail" onclick="openPendingInOutlook()" id="pendingOutlookBtn" style="background:linear-gradient(135deg,#7c3aed,#5b21b6);min-width:180px;">
+        📧 Send to Outlook Draft
+      </button>
     </div>
   </div>
 </div>
@@ -2336,16 +2352,42 @@ function fallbackCopy(el) {
   showToast('Email body copied! Paste into Outlook (Ctrl+V)', 'success');
 }
 
-function openInOutlook() {
-  const preview = document.getElementById('mailPreview');
-  // If still showing spinner/error, don't proceed
+async function openInOutlook() {
   if (!_mailReportData) { showToast('Please wait — report is still loading', 'error'); return; }
-  const to      = document.getElementById('mailTo').value.trim();
-  const cc      = document.getElementById('mailCc').value.trim();
-  const subject = document.getElementById('mailSubject').value.trim();
-  const bodyHtml = preview.innerHTML;
+  const to       = document.getElementById('mailTo').value.trim();
+  const cc       = document.getElementById('mailCc').value.trim();
+  const subject  = document.getElementById('mailSubject').value.trim();
+  const date     = document.getElementById('mailDate').value;
+  const bodyHtml = document.getElementById('mailPreview').innerHTML;
 
-  // Build .eml with X-Unsent:1 — Outlook 2016 opens this as a ready compose window
+  const btn = document.getElementById('outlookBtn');
+  btn.disabled  = true;
+  btn.textContent = '⏳ Opening Outlook…';
+
+  try {
+    const r = await apiFetch(`${API}/mail/open-draft`, {
+      method: 'POST',
+      headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+      body: JSON.stringify({ to, cc, subject, body_html: bodyHtml, date, report_type: 'daily' })
+    });
+    const resp = await r.json();
+    if (resp.success) {
+      showToast('📧 Outlook 2016 opened — mail saved as Draft!', 'success');
+    } else {
+      // Fallback: download .eml if backend can't open Outlook directly
+      _downloadEml(to, cc, subject, bodyHtml, `DSC_Daily_Report_${date}.eml`);
+      showToast('📧 .eml downloaded — double-click to open in Outlook', 'success');
+    }
+  } catch(e) {
+    _downloadEml(to, cc, subject, bodyHtml, `DSC_Daily_Report_${date}.eml`);
+    showToast('📧 .eml downloaded — double-click to open in Outlook', 'success');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '📧 Send to Outlook Draft';
+  }
+}
+
+function _downloadEml(to, cc, subject, bodyHtml, filename) {
   const emlContent = [
     'MIME-Version: 1.0',
     `To: ${to}`,
@@ -2358,18 +2400,12 @@ function openInOutlook() {
     bodyHtml,
     `</body></html>`
   ].join('\r\n');
-
   const blob = new Blob([emlContent], { type: 'message/rfc822' });
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
-  const date = document.getElementById('mailDate').value;
-  a.href     = url;
-  a.download = `DSC_Daily_Report_${date}.eml`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-  showToast('📧 .eml downloaded — double-click to open in Outlook!', 'success');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
 }
 
 // ══════════════════════════════════════════════════════════
@@ -2587,11 +2623,38 @@ function copyPendingMailHtml() {
   }
 }
 
-function openPendingInOutlook() {
-  const to      = encodeURIComponent(document.getElementById('pMailTo').value);
-  const cc      = encodeURIComponent(document.getElementById('pMailCc').value);
-  const subject = encodeURIComponent(document.getElementById('pMailSubject').value);
-  window.location.href = `mailto:${to}?cc=${cc}&subject=${subject}`;
+async function openPendingInOutlook() {
+  if (!_pendingReportData) { showToast('Please wait — report is still loading', 'error'); return; }
+  const to       = document.getElementById('pMailTo').value.trim();
+  const cc       = document.getElementById('pMailCc').value.trim();
+  const subject  = document.getElementById('pMailSubject').value.trim();
+  const date     = document.getElementById('pMailDate').value;
+  const bodyHtml = document.getElementById('pendingMailPreview').innerHTML;
+
+  const btn = document.getElementById('pendingOutlookBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Opening Outlook…';
+
+  try {
+    const r = await apiFetch(`${API}/mail/open-draft`, {
+      method: 'POST',
+      headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+      body: JSON.stringify({ to, cc, subject, body_html: bodyHtml, date, report_type: 'pending' })
+    });
+    const resp = await r.json();
+    if (resp.success) {
+      showToast('📧 Outlook 2016 opened — mail saved as Draft!', 'success');
+    } else {
+      _downloadEml(to, cc, subject, bodyHtml, `DSC_Pending_Report_${date}.eml`);
+      showToast('📧 .eml downloaded — double-click to open in Outlook', 'success');
+    }
+  } catch(e) {
+    _downloadEml(to, cc, subject, bodyHtml, `DSC_Pending_Report_${date}.eml`);
+    showToast('📧 .eml downloaded — double-click to open in Outlook', 'success');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '📧 Send to Outlook Draft';
+  }
 }
 
 

@@ -1426,6 +1426,138 @@ def pending_report():
     finally:
         cur.close(); conn.close()
 
+# ── Mail: Open as Outlook Draft ───────────────────────────
+@app.route("/api/mail/open-draft", methods=["POST"])
+@login_required
+def open_outlook_draft():
+    """
+    Creates a draft mail directly inside Microsoft Outlook 2016
+    (Microsoft Office Professional Plus 2016, Exchange / domain account).
+
+    Priority chain
+    ──────────────
+    1. win32com  → Talks directly to the running Outlook.Application COM
+                   object. Creates a MailItem, sets To/CC/Subject/HTMLBody,
+                   calls .Save() (→ Drafts folder) then .Display() (→ opens
+                   compose window). Works perfectly with Exchange/domain
+                   accounts like PB0319@PGSOLUTIONS.LOCAL.
+
+    2. .eml file → Fallback for non-Windows or if pywin32 is not installed.
+                   Writes X-Unsent:1 .eml to %TEMP% and calls os.startfile().
+                   The user may need to double-click if shell association
+                   is not set to Outlook.
+
+    Install pywin32 once:  pip install pywin32
+    """
+    if not request.is_json:
+        return err("Content-Type must be application/json")
+
+    data      = request.get_json()
+    to        = (data.get("to")          or "").strip()
+    cc        = (data.get("cc")          or "").strip()
+    subject   = (data.get("subject")     or "DSC Report").strip()
+    body_html = (data.get("body_html")   or "")
+    date_str  = (data.get("date")        or datetime.now().strftime("%Y-%m-%d"))
+    rtype     = (data.get("report_type") or "daily")
+
+    # ── Full HTML wrapper (Outlook-safe, Calibri body) ─────────────
+    full_html = (
+        '<!DOCTYPE html><html><head><meta charset="UTF-8"></head>'
+        '<body style="font-family:Calibri,Arial,sans-serif;font-size:13px;'
+        'color:#000;margin:0;padding:0">'
+        + body_html +
+        "</body></html>"
+    )
+
+    import sys as _sys
+
+    # ══════════════════════════════════════════════════════════════
+    # METHOD 1 — win32com  (best for Outlook 2016 + Exchange)
+    # ══════════════════════════════════════════════════════════════
+    if _sys.platform == "win32":
+        try:
+            import win32com.client  # pip install pywin32
+
+            # Get or launch the running Outlook instance
+            try:
+                outlook = win32com.client.GetActiveObject("Outlook.Application")
+            except Exception:
+                # Outlook not running — launch it
+                outlook = win32com.client.Dispatch("Outlook.Application")
+
+            # olMailItem = 0
+            mail = outlook.CreateItem(0)
+
+            mail.To       = to
+            mail.CC       = cc
+            mail.Subject  = subject
+            mail.HTMLBody = full_html   # full rich HTML — Outlook renders it natively
+
+            # Save to Drafts folder first (so it's safe even if user closes it)
+            mail.Save()
+
+            # Display the compose window — user sees it ready to send
+            mail.Display(False)   # False = non-modal (doesn't block Flask)
+
+            return ok(
+                {"method": "win32com", "to": to, "subject": subject},
+                message="Draft opened in Outlook 2016 compose window"
+            )
+
+        except ImportError:
+            # pywin32 not installed — fall through to .eml method
+            pass
+
+        except Exception as e:
+            # COM error (e.g. Outlook locked / UAC issue) — fall through
+            print(f"[OUTLOOK COM ERROR] {type(e).__name__}: {e}")
+
+    # ══════════════════════════════════════════════════════════════
+    # METHOD 2 — .eml file fallback
+    # ══════════════════════════════════════════════════════════════
+    import tempfile, subprocess
+
+    eml_lines = [
+        "MIME-Version: 1.0",
+        f"To: {to}",
+        f"CC: {cc}",
+        f"Subject: {subject}",
+        "X-Unsent: 1",
+        "Content-Type: text/html; charset=UTF-8",
+        "",
+        full_html,
+    ]
+    eml_content = "\r\n".join(eml_lines)
+
+    prefix = f"DSC_{'Daily' if rtype == 'daily' else 'Pending'}_Report_{date_str}_"
+    tmp = tempfile.NamedTemporaryFile(
+        suffix=".eml", prefix=prefix, delete=False,
+        dir=tempfile.gettempdir(), mode="w", encoding="utf-8"
+    )
+    tmp.write(eml_content)
+    tmp.close()
+    eml_path = tmp.name
+
+    try:
+        if _sys.platform == "win32":
+            import os as _os
+            _os.startfile(eml_path)
+        elif _sys.platform == "darwin":
+            subprocess.Popen(["open", eml_path])
+        else:
+            subprocess.Popen(["xdg-open", eml_path])
+        return ok(
+            {"method": "eml", "eml_path": eml_path},
+            message="Draft .eml opened (install pywin32 for direct Outlook integration)"
+        )
+    except Exception as e:
+        return err(
+            f"Could not open Outlook automatically. "
+            f"Install pywin32 (`pip install pywin32`) for direct Outlook 2016 support. "
+            f"Error: {e}"
+        )
+
+
 # ── Error handlers ─────────────────────────────────────────
 @app.errorhandler(404)
 def not_found(_):          return err("Endpoint not found", 404)
